@@ -1,0 +1,429 @@
+<%@ page errorPage="ShowError.jsp"%>
+<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport">
+<title>Welcome To | Appointment Management</title>
+<!-- Favicon-->
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+
+<!-- Google Fonts -->
+<link
+	href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext"
+	rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+	rel="stylesheet" type="text/css">
+
+<!-- Bootstrap Core Css -->
+<link href="../plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+<!-- Waves Effect Css -->
+<link href="../plugins/node-waves/waves.css" rel="stylesheet" />
+
+<!-- Animation Css -->
+<link href="../plugins/animate-css/animate.css" rel="stylesheet" />
+
+<!-- Wait Me Css -->
+<link href="../plugins/waitme/waitMe.css" rel="stylesheet" />
+
+<!-- Bootstrap Select Css -->
+<link href="../plugins/bootstrap-select/css/bootstrap-select.css"
+	rel="stylesheet" />
+
+<!-- Sweetalert Css -->
+<link href="../../plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+
+<!-- Custom Css -->
+<link href="../css/style.css" rel="stylesheet">
+
+<!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
+<link href="../css/themes/all-themes.css" rel="stylesheet" />
+
+<style>
+tfoot input {
+	width: 100%;
+	padding: 3px;
+	box-sizing: border-box;
+}
+</style>
+
+</head>
+
+<body class="theme-purple">
+	<!-- Page Loader -->
+	<div class="page-loader-wrapper">
+		<div class="loader">
+			<div class="preloader">
+				<div class="spinner-layer pl-purple">
+					<div class="circle-clipper left">
+						<div class="circle"></div>
+					</div>
+					<div class="circle-clipper right">
+						<div class="circle"></div>
+					</div>
+				</div>
+			</div>
+			<p>Please wait...</p>
+		</div>
+	</div>
+	<!-- #END# Page Loader -->
+	<!-- Overlay For Sidebars -->
+	<div class="overlay"></div>
+	<!-- #END# Overlay For Sidebars -->
+	<%@ include file="./sidebar.jsp"%>
+
+	<section class="content">
+		<div class="container-fluid">
+			<div class="block-header">
+				<h2>REPORT</h2>
+			</div>
+			<!-- Basic Examples -->
+			<div class="row clearfix">
+				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+					<div class="card">
+						<div class="body">
+							<!-- Nav tabs -->
+							<ul class="nav nav-tabs tab-nav-right tab-col-lime"
+								role="tablist">
+								<li role="presentation" class="active"><a href="#index"
+									data-toggle="tab">Appointment Report</a></li>
+							</ul>
+
+							<br> <br>
+
+
+							<div class="row clearfix">
+								<!-- <form onsubmit="generateAppointmentReport()"> -->
+								<div class="col-sm-1" style="text-align: right;">
+									<label for="startDatePick">Start Date</label>
+								</div>
+								<div class="col-sm-2">
+									<div class="form-group">
+										<div class="form-line">
+											<input type="date" name="startDatePick" id="startDatePick"
+												class="datepicker form-control" required="required">
+
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-1" style="text-align: right;">
+									<label for="endDatePick">End Date</label>
+								</div>
+								<div class="col-sm-2">
+									<div class="form-group">
+										<div class="form-line">
+											<input type="date" name="endDatePick" id="endDatePick"
+												class="datepicker form-control" required="required">
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-1" style="text-align: right;">
+									<label for="statusPick">Status</label>
+								</div>
+								<div class="col-sm-2">
+									<div class="form-group">
+										<select id="statusPick" name="statusPick"
+											class="form-control show-tick">
+											<option value="">-- Any status --</option>
+											<option value="0">Pending</option>
+											<option value="1">Approve</option>
+											<option value="2">Reject</option>
+											<option value="3">Cancelled</option>
+											<option value="4">Confirmed</option>
+											<option value="5">Visited</option>
+										</select>
+									</div>
+
+
+								</div>
+								<div class="col-sm-3">
+									<button type="button" onclick="generateAppointmentReport()"
+										class="btn btn-info waves-effect pull-left">Generate
+										Report</button>
+								</div>
+
+							</div>
+							<br>
+
+							<table id="reportTable"
+								class="table table-bordered table-striped table-hover">
+								<thead>
+									<tr>
+										<th>Start time</th>
+										<th>End time</th>
+										<th>Patient's HN</th>
+										<th>Patient's Name</th>
+										<th>Requested Doctor</th>
+										<th>Status</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+
+							<div class="clearfix"></div>
+
+
+						</div>
+					</div>
+				</div>
+
+				<!-- #END# Basic Examples -->
+			</div>
+		</div>
+	</section>
+
+	<%@include file="../settings.jsp"%>
+
+	<!-- Jquery Core Js -->
+	<script src="../../plugins/jquery/jquery.min.js"></script>
+
+	<!-- Bootstrap Core Js -->
+	<script src="../../plugins/bootstrap/js/bootstrap.js"></script>
+
+	<!-- Select Plugin Js -->
+	<script src="../../plugins/bootstrap-select/js/bootstrap-select.js"></script>
+
+	<!-- Slimscroll Plugin Js -->
+	<script src="../../plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
+
+	<!-- SweetAlert Plugin Js -->
+	<script src="../../plugins/sweetalert/sweetalert.min.js"></script>
+
+	<!-- Waves Effect Plugin Js -->
+	<script src="../../plugins/node-waves/waves.js"></script>
+
+	<!-- Jquery DataTable Plugin Js -->
+	<script src="../../plugins/jquery-datatable/jquery.dataTables.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/dataTables.buttons.min.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/buttons.flash.min.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/jszip.min.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/pdfmake.min.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/vfs_fonts.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/buttons.html5.min.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/buttons.print.min.js"></script>
+
+	<!-- Custom Js -->
+	<script src="../../js/admin.js"></script>
+	<script src="../../js/pages/tables/jquery-datatable.js"></script>
+	<script src="../../js/pages/ui/dialogs.js"></script>
+
+	<!-- Demo Js -->
+	<script src="../../js/demo.js"></script>
+
+
+	<script>
+		$(document).ready(function() {
+			$('#reportTable').DataTable(
+					{
+						dom : '<"pull-right"f><"pull-left"B>rt<"pull-left"i><"pull-right"p>',
+						buttons: [{
+	                        // export type
+	                        extend: 'pdf',
+	                        // design
+	                        orientation: 'portrait',
+
+	                        pageSize: 'LEGAL',
+	                        // button name
+	                        text: 'Export to PDF',
+	                        // no. of column to export
+	                        exportOptions: {
+	                            columns: [0, 1, 2, 3, 4, 5],
+	                        },
+	                        customize: function(doc) {
+	                        	doc.defaultStyle['font'] = 'THSarabun';
+	                        }
+
+	                    },{
+	                        // export type
+	                        extend: 'csv',
+	                        // design
+	                        orientation: 'portrait',
+
+	                        pageSize: 'LEGAL',
+	                        // button name
+	                        text: 'Export to CSV',
+	                        // no. of column to export
+	                        exportOptions: {
+	                            columns: [0, 1, 2, 3, 4, 5],
+	                        },
+	                        customize: function(doc) {
+	                        	doc.defaultStyle['font'] = 'THSarabun';
+	                        }
+
+	                    }]
+					});
+
+		});
+
+		function generateAppointmentReport() {
+
+			$('#reportTable').DataTable().destroy();
+
+			var startDate = $('#startDatePick').val();
+
+			var endDate = $('#endDatePick').val();
+			if (startDate == '' || endDate == '') {
+				// please fill start data and end date
+				swal(
+						"Fail!",
+						"Please choose start data and end date before generate report",
+						"warning");
+			} else {
+
+				var status = $('#statusPick').val();
+				if (status == '') {
+					status = -1;
+				}
+
+				$("#loader").show();
+				$
+						.ajax({
+							url : "../findAppointmentByDateAndStatusWS.do?startDate="
+									+ startDate
+									+ "&endDate="
+									+ endDate
+									+ "&status=" + status,
+							type : "get",
+							dataType : "json",
+							contentType : "application/json",
+							mimeType : "application/json",
+							success : function(data) {
+
+								var html = '';
+								html += "<thead>";
+								html += "<tr>";
+								html += "<th>Start time</th>";
+								html += "<th>End time</th>";
+								html += "<th>Patient's HN</th>";
+								html += "<th>Patient's Name</th>";
+								html += "<th>Requested Doctor</th>";
+								html += "<th>Status</th>";
+								html += "</tr>";
+								html += "</thead>";
+
+								html += "<tbody>";
+
+								for (var i = 0; i < data.length; i++) {
+
+									// Set color of each row
+									if (data[i].status == 0) {
+										html += "<tr class=\"bg-grey\">";
+									} else if (data[i].status == 1) {
+										html += "<tr class=\"bg-light-green\">";
+									} else if (data[i].status == 2) {
+										html += "<tr class=\"bg-amber\">";
+									} else if (data[i].status == 3) {
+										html += "<tr class=\"bg-red\">";
+									} else if (data[i].status == 4) {
+										html += "<tr class=\"bg-green\">";
+									} else {
+										html += "<tr class=\"bg-purple\">";
+									}
+
+									html += "<td>" + data[i].startDateTime
+											+ "</td>";
+									html += "<td>" + data[i].endDateTime
+											+ "</td>";
+									html += "<td>" + data[i].patient.codeHN
+											+ "</td>";
+									html += "<td>" + data[i].patient.firstname
+											+ " " + data[i].patient.lastname
+											+ "</td>";
+									html += "<td>" + data[i].doctor.firstname
+											+ " " + data[i].doctor.lastname
+											+ "</td>";
+									if (data[i].status == 0) {
+										html += "<td> Pending </td>";
+									} else if (data[i].status == 1) {
+										html += "<td> Approved </td>";
+									} else if (data[i].status == 2) {
+										html += "<td> Rejected </td>";
+									} else if (data[i].status == 3) {
+										html += "<td> Cancelled </td>";
+									} else if (data[i].status == 4) {
+										html += "<td> Confirmed </td>";
+									} else {
+										html += "<td> Visited </td>";
+									}
+									html += "</tr>";
+								}
+								html += "</tbody>";
+
+								$('#reportTable').html(html);
+								// Setup - add a text input to each footer cell
+
+								$('#reportTable')
+										.DataTable(
+												{
+													//dom : 'Bfrtip',
+													dom : '<"pull-right"f><"pull-left"B>rt<"pull-left"i><"pull-right"p>',
+													buttons: [{
+								                        // export type
+								                        extend: 'pdf',
+								                        // design
+								                        orientation: 'portrait',
+
+								                        pageSize: 'LEGAL',
+								                        // button name
+								                        text: 'Export to PDF',
+								                        // no. of column to export
+								                        exportOptions: {
+								                            columns: [0, 1, 2, 3, 4, 5],
+								                        },
+								                        customize: function(doc) {
+								                        	doc.defaultStyle['font'] = 'THSarabun';
+								                        }
+
+								                    },{
+								                        // export type
+								                        extend: 'csv',
+								                        // design
+								                        orientation: 'portrait',
+
+								                        pageSize: 'LEGAL',
+								                        // button name
+								                        text: 'Export to CSV',
+								                        // no. of column to export
+								                        exportOptions: {
+								                            columns: [0, 1, 2, 3, 4, 5],
+								                        },
+								                        customize: function(doc) {
+								                        	doc.defaultStyle['font'] = 'THSarabun';
+								                        }
+
+								                    }]
+												});
+
+								$("#loader").hide();
+							},
+							error : function(data, status, er) {
+								//alert(data + " " + status + " " + er)
+								$("#loader").hide();
+							}
+						});
+			}
+		}
+	</script>
+
+
+</body>
+
+</html>
+
+

@@ -1,0 +1,347 @@
+package com.mfu.dao.appointment;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+import com.mfu.dao.record.DoctorDAO;
+import com.mfu.dao.record.PatientDAO;
+import com.mfu.entity.appointment.Appointment;
+
+public class AppointmentDAO {
+
+	private static final EntityManagerFactory emfInstance = Persistence
+			.createEntityManagerFactory("transactions-optional");
+
+	private EntityManager em = null;
+
+	public AppointmentDAO() {
+		em = emfInstance.createEntityManager();
+	}
+
+	public List<Appointment> getAllAppointment() {
+
+		List<Appointment> appointments = null;
+		ArrayList<Appointment> result = null;
+		try {
+			Query q = em.createQuery("select p from Appointment p");
+
+			appointments = q.getResultList();
+			result = new ArrayList<Appointment>();
+			for (Appointment a : appointments) {
+				result.add(setRelatedEntities(a));
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+
+			e.printStackTrace();
+
+		}
+
+		return appointments;
+
+	}
+
+	public List<Appointment> findTop5AppointmentByPatientKey(String key) {
+
+		List<Appointment> appointments = null;
+		ArrayList<Appointment> result = null;
+		try {
+			Query q = em.createQuery("select p from Appointment p where p.patientId = :key ORDER BY p.startDateTime DESC");
+			q.setParameter("key", key);
+			appointments = q.getResultList();
+			result = new ArrayList<Appointment>();
+			for (int i = 0; i < appointments.size() && i < 5; i++) {
+				result.add(setRelatedEntities(appointments.get(i)));
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+
+			e.printStackTrace();
+
+		}
+
+		return result;
+
+	}
+
+	public Appointment findAppointmentByKey(String key) {
+
+		Appointment appointment = null;
+
+		try {
+			Query q = em.createQuery("select p from Appointment p where p.key = :key");
+
+			q.setParameter("key", key);
+			List<Appointment> appointments = q.getResultList();
+			appointment = appointments.get(0);
+			appointment = setRelatedEntities(appointment);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return appointment;
+
+	}
+
+	public Appointment insertAppointment(Appointment appointment) {
+
+		try {
+			em.persist(appointment);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return appointment;
+
+	}
+
+	public Appointment updateAppointment(Appointment appointment) {
+
+		try {
+			em.merge(appointment);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return appointment;
+
+	}
+
+	public void deleteAppointment(String key) {
+
+		Appointment appointment = this.findAppointmentByKey(key);
+		if (appointment != null)
+			em.remove(appointment);
+	}
+
+	public void closeEntityManager() {
+
+		if (em != null)
+
+			em.close();
+
+	}
+
+	public List<Appointment> findAppointmentByDoctorId(String doctorKey) {
+		List<Appointment> result = null;
+		List<Appointment> appointments = null;
+		try {
+			Query q = em.createQuery("select a from Appointment a where a.doctorId = :doctorId");
+			q.setParameter("doctorId", doctorKey);
+			appointments = q.getResultList();
+			result = new ArrayList<Appointment>();
+			for (Appointment a : appointments) {
+				result.add(setRelatedEntities(a));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+
+	public List<Appointment> findAppointmentByDoctorAndTime(String doctorKey, Date startTime, Date endTime) {
+		List<Appointment> result = new ArrayList<Appointment>();
+		try {
+			Query q = em
+					.createQuery(
+							"select a from Appointment a where a.doctorId = :doctorId AND a.startDateTime>=:startTime  AND a.startDateTime<=:endTime")
+					.setParameter("startTime", startTime).setParameter("endTime", endTime)
+					.setParameter("doctorId", doctorKey);
+			
+			List<Appointment> result1 = q.getResultList();
+
+			q = em.createQuery(
+					"select a from Appointment a where a.doctorId = :doctorId AND a.endDateTime>= :startTime AND a.endDateTime<=:endTime")
+					.setParameter("startTime", startTime).setParameter("endTime", endTime)
+					.setParameter("doctorId", doctorKey);
+			
+			List<Appointment> result2 = q.getResultList();
+			
+			System.out.println("Size 1 : "+result1.size()+" Size 2 :"+result2.size());
+			for (Appointment a : result1) {
+				boolean isMatch = false;
+				System.out.print("Compare "+a.getStartDateTime()+" : ");
+				for (Appointment b : result2) {
+					System.out.println(b.getStartDateTime()+" : ");
+					if (b.getKeyString().equals(a.getKeyString())) {
+						if(b.getStatus() == Appointment.STATUS_APPROVE || b.getStatus() == Appointment.STATUS_CONFIRM){
+							System.out.println("Yes");
+							isMatch = true;
+						}
+						
+					}
+				}
+				if (isMatch)
+					result.add(a);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public boolean checkAppointmentValid(Appointment a) {
+		List<Appointment> result = new ArrayList<Appointment>();
+		try {
+			Query q = em
+					.createQuery(
+							"select a from Appointment a where (a.status=1 OR a.status=4) AND a.doctorId = :doctorId AND a.startDateTime>=:startTime  AND a.startDateTime<=:endTime")
+					.setParameter("startTime", a.getStartDateTime()).setParameter("endTime", a.getEndDateTime())
+					.setParameter("doctorId", a.getDoctorId()).setParameter("curKey", a.getKey());
+			result.addAll(q.getResultList());
+
+			q = em.createQuery(
+					"select a from Appointment a where (a.status=1 OR a.status=4) AND a.doctorId = :doctorId AND a.endDateTime>= :startTime AND a.endDateTime<=:endTime")
+					.setParameter("startTime", a.getStartDateTime()).setParameter("endTime", a.getEndDateTime())
+					.setParameter("doctorId", a.getDoctorId()).setParameter("curKey", a.getKey());
+			result.addAll(q.getResultList());
+
+			List<Appointment> concurrentApt = new ArrayList<Appointment>();
+			for (Appointment apt : result) {
+				if (!apt.getKeyString().equals(a.getKeyString()) && !concurrentApt.contains(apt))
+					concurrentApt.add(apt);
+			}
+
+			System.out.println("checkAppointmentValid " + concurrentApt.size());
+
+			if (concurrentApt.size() > 0)
+				return false;
+			else
+				return true;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public List<Appointment> findAppointmentByPatientId(String patientKey) {
+
+		List<Appointment> appointments = null;
+		try {
+			Query q = em.createQuery(
+					"select a from Appointment a where a.patientId = :patientKey order by a.startDateTime");
+			q.setParameter("patientKey", patientKey);
+			appointments = q.getResultList();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return appointments;
+	}
+
+	public List<Appointment> findAppointmentByFromDate(String patientKey, Date fromDate) {
+
+		List<Appointment> appointments = null;
+		try {
+			Query q = em.createQuery(
+					"select a from Appointment a where a.patientId = :patientKey AND a.startDateTime > :fromDate order by a.startDateTime");
+			q.setParameter("patientKey", patientKey);
+			q.setParameter("fromDate", fromDate);
+			appointments = q.getResultList();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return appointments;
+	}
+
+	public List<Appointment> findAppointmentByStatus(String patientKey, int status) {
+
+		List<Appointment> appointments = null;
+		try {
+			Query q = em.createQuery(
+					"select a from Appointment a where a.patientId = :patientKey AND a.status=:status order by a.startDateTime");
+			q.setParameter("patientKey", patientKey);
+			q.setParameter("status", status);
+			appointments = q.getResultList();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return appointments;
+	}
+
+	public List<Appointment> findAppointmentByStatus(int status) {
+
+		List<Appointment> appointments = null;
+		List<Appointment> result = null;
+		try {
+			Query q = em.createQuery("select a from Appointment a where a.status = :status");
+			q.setParameter("status", status);
+			appointments = q.getResultList();
+			result = new ArrayList<Appointment>();
+			for (Appointment a : appointments) {
+				result.add(setRelatedEntities(a));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+
+	private Appointment setRelatedEntities(Appointment appointment) {
+		// set patient
+		if (appointment.getPatientId() != null) {
+			PatientDAO pDAO = new PatientDAO();
+			appointment.setPatient(pDAO.findPatientByKey(appointment.getPatientId()));
+		}
+
+		// set doctor
+		DoctorDAO dDAO = new DoctorDAO();
+		appointment.setDoctor(dDAO.findDoctorByKey(appointment.getDoctorId()));
+
+		return appointment;
+
+	}
+
+	public List<Appointment> findAppointmentByDateAndStatus(Date sDate, Date eDate) {
+		List<Appointment> appointments = null;
+		List<Appointment> result = null;
+		try {
+			Query q = em.createQuery(
+					"select a from Appointment a where a.startDateTime >= :startDate AND a.startDateTime <= :endDate");
+			q.setParameter("startDate", sDate);
+			q.setParameter("endDate", eDate);
+			appointments = q.getResultList();
+			result = new ArrayList<Appointment>();
+			for (Appointment a : appointments) {
+				result.add(setRelatedEntities(a));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public List<Appointment> findAppointmentByDateAndStatus(Date sDate, Date eDate, int status) {
+		List<Appointment> appointments = null;
+		List<Appointment> result = null;
+		try {
+			Query q = em.createQuery(
+					"select a from Appointment a where a.startDateTime >= :startDate AND a.startDateTime <= :endDate AND a.status = :status");
+			q.setParameter("startDate", sDate);
+			q.setParameter("endDate", eDate);
+			q.setParameter("status", status);
+			appointments = q.getResultList();
+			result = new ArrayList<Appointment>();
+			for (Appointment a : appointments) {
+				result.add(setRelatedEntities(a));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+}

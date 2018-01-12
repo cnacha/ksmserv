@@ -1,0 +1,73 @@
+package com.mfu.entity.ha;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+import kmt.Cluster;
+import kmt.Point;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+
+@Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class SymptomCluster {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Key key;
+
+	private double[] centroid;
+	private String symptomKey;
+	private int level;
+
+	public Key getKey() {
+		return key;
+	}
+
+	public void setKey(Key key) {
+		this.key = key;
+	}
+
+	public double[] getCentroid() {
+		return centroid;
+	}
+
+	public void setCentroid(double[] centroid) {
+		this.centroid = centroid;
+	}
+
+	public String getKeyString() {
+		return KeyFactory.keyToString(key);
+	}
+
+	public void setKeyString(String keyString) {
+		key = KeyFactory.stringToKey(keyString);
+	}
+
+	public String getSymptomKey() {
+		return symptomKey;
+	}
+
+	public void setSymptomKey(String symptomKey) {
+		this.symptomKey = symptomKey;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
+
+	public Cluster convert(int i) {
+		Cluster c = new Cluster(i);
+		c.setCentroid(new Point(this.getCentroid()));
+		return c;
+	}
+
+}

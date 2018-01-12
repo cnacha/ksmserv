@@ -1,0 +1,88 @@
+package com.mfu.entity.survey;
+
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+
+@Entity 
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class SurveyForm {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Key key;
+	private String name;
+	private String description;
+	private String voucherDescript;
+
+	/*
+	@OneToMany(mappedBy="form", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private List<Question> questions;
+	
+	@OneToMany(mappedBy="form")
+	private List<FilledForm> filledForms;
+	*/
+	
+	@Transient
+	private List<Question> questions;
+
+	public Key getKey() {
+		return key;
+	}
+
+	public void setKey(Key key) {
+		this.key = key;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
+	public String getVoucherDescript() {
+		return voucherDescript;
+	}
+
+	public void setVoucherDescript(String voucherDescript) {
+		this.voucherDescript = voucherDescript;
+	}
+
+	public String getKeyString() {
+		return KeyFactory.keyToString(key);
+	}
+
+	public void setKeyString(String keyString) {
+		key = KeyFactory.stringToKey(keyString);
+	}
+
+	public List<Question> getQuestions() {
+		return questions;
+	}
+
+	public void setQuestions(List<Question> questions) {
+		this.questions = questions;
+	}
+	
+}

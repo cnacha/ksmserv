@@ -1,0 +1,65 @@
+package com.mfu.entity.Kmean;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+
+public class Kmeantest {
+	
+	private int[] x;
+	private int[] y;
+	private int[] sampledataX;
+	private int[] sampledataY;
+	private Key key;
+	public String impactName;
+	public String symptomName;
+	
+	
+	public int[] getX() {
+		return x;
+	}
+	public void setX(int[] x) {
+		this.x = x;
+	}
+	public int[] getY() {
+		return y;
+	}
+	public void setY(int[] y) {
+		this.y = y;
+	}
+	public int[] getSampledataX() {
+		return sampledataX;
+	}
+	public void setSampledataX(int[] sampledataX) {
+		this.sampledataX = sampledataX;
+	}
+	public int[] getSampledataY() {
+		return sampledataY;
+	}
+	public void setSampledataY(int[] sampledataY) {
+		this.sampledataY = sampledataY;
+	}
+	public Key getKey() {
+		return key;
+	}
+	public void setKey(Key key) {
+		this.key = key;
+	}
+	public String getKeyString() {
+		return KeyFactory.keyToString(key);
+	}
+	public void setKeyString(String keyString) {
+		key = KeyFactory.stringToKey(keyString);
+	}
+	public String getImpactName() {
+		return impactName;
+	}
+	public void setImpactName(String impactName) {
+		this.impactName = impactName;
+	}
+	public String getSymptomName() {
+		return symptomName;
+	}
+	public void setSymptomName(String symptomName) {
+		this.symptomName = symptomName;
+	}
+}

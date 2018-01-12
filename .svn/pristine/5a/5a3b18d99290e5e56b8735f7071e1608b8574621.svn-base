@@ -1,0 +1,59 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h1 style="color:red;"> Add Vital Sign For <%=request.getParameter("name") %></h1>
+<h3>bodyWeight : <input type="number" id="bodyWeight" name="bodyWeight"></h3>
+<h3>bodyHeight : <input type="number" id="bodyHeight" name="bodyHeight"></h3>
+<h3>temperature   : <input type="number" id="temperature" name="temperature"></h3>
+<h3>pulseRate : <input type="number" id="pulseRate" name="pulseRate"></h3>
+<h3>respitoryRate : <input type="number" id="respitoryRate" name="respitoryRate"></h3>
+<h3>bpSystolic : <input type="number" id="bpSystolic" name="bpSystolic"></h3>
+<h3>bpDiastolic : <input type="number" id="bpDiastolic" name="bpDiastolic"></h3>
+
+<button type="submit" onClick="create()"> Submit </button>
+<script src="../plugins/jquery/jquery.min.js"></script>
+<script type="text/javascript">
+function create() {
+	$("#loader").show();
+	var key = '<%=request.getParameter("key")%>';
+	var obj = {
+		bodyWeight : $('#bodyWeight').val(),
+		bodyHeight : $('#bodyHeight').val(),
+		temperature : $('#temperature').val(),
+		pulseRate : $('#pulseRate').val(),
+		respitoryRate : $('#respitoryRate').val(),
+		bpSystolic : $('#bpSystolic').val(),
+		bpDiastolic : $('#bpDiastolic').val(),
+		patientId : key,
+		codeHN : <%=request.getParameter("hn")%>
+	};
+	alert(JSON.stringify(obj));
+	$.ajax({
+		url : "../saveVitalSignWS.do",
+		type : "POST",
+		dataType : "JSON",
+		data : JSON.stringify(obj),
+		contentType : "application/json",
+		mimeType : "application/json",
+		success : function(data) {
+			alert('success');
+			$("#loader").hide();
+		},
+		error : function(data, status, er) {
+			alert('error');
+			$("#loader").hide();
+		}
+	});
+	
+}
+
+
+</script>
+</body>
+</html>

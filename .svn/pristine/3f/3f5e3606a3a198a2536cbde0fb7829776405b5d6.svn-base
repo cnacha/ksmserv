@@ -1,0 +1,139 @@
+package com.mfu.web.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.mfu.dao.Kmean.ImpactFactorDAO;
+import com.mfu.dao.Kmean.SymptomDAO;
+import com.mfu.dao.appointment.AppointmentDAO;
+import com.mfu.dao.common.UserDAO;
+import com.mfu.dao.record.ClinicDAO;
+import com.mfu.dao.survey.VitalSignDAO;
+import com.mfu.entity.Kmean.ImpactFactor;
+import com.mfu.entity.Kmean.Kmeantest;
+import com.mfu.entity.Kmean.Symptom;
+import com.mfu.entity.appointment.Appointment;
+import com.mfu.entity.common.User;
+import com.mfu.entity.record.Clinic;
+import com.mfu.entity.record.VitalSign;
+
+@Controller
+public class VitalSignController {
+	@RequestMapping(value = "/listVitalSignWS", method = RequestMethod.GET)
+	@ResponseBody
+	public List<VitalSign> listVitalSignWS(HttpServletRequest request) {
+		
+		VitalSignDAO VitalSignServ = new VitalSignDAO();
+		List<VitalSign> vitalSign = VitalSignServ.getAllVitalSign();
+		VitalSignServ.closeEntityManager();
+		return vitalSign;
+	}
+	
+	@RequestMapping(value = "/saveVitalSignWS", method = RequestMethod.POST)
+	@ResponseBody
+	public String saveVitalSignWS(@RequestBody VitalSign vitalSign, HttpServletRequest request) {
+		
+		VitalSignDAO VitalSignServ = new VitalSignDAO();
+		try {
+			if(vitalSign.getKey() == null)
+				VitalSignServ.saveVitalSign(vitalSign);
+			else
+				VitalSignServ.updateVitalSign(vitalSign);
+			return "1";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			VitalSignServ.closeEntityManager();
+		}
+		return "-1";
+	}
+	
+	@RequestMapping(value = "/deleteVitalSignWS", method = RequestMethod.DELETE)
+	public @ResponseBody String deleteVitalSignWS(HttpServletRequest request) {
+		
+		try {
+
+			VitalSignDAO VitalSignServ = new VitalSignDAO();
+			VitalSignServ.deleteVitalSign(request.getParameter("key"));
+			VitalSignServ.closeEntityManager();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "-1";
+		}
+
+		return "1";
+	}
+	
+
+	@RequestMapping(value = "/addVitalSignWS", method = RequestMethod.GET)
+	@ResponseBody
+	public String TestVitalSign() {
+
+		try {
+			VitalSignDAO vitalSignService = new VitalSignDAO();
+			VitalSign vitalSign = new VitalSign();
+		
+			
+			
+				 /* vitalSign.setBodyHeight(120);
+				vitalSign.setBodyWeight(50);
+				vitalSign.setBpDiastolic(62);
+				vitalSign.setBpSystolic(95);
+				vitalSign.setPulseRate(65);
+				vitalSign.setRespitoryRate(76);
+				vitalSign.setTemperature(34);
+				vitalSign.setCodeHN("12345678");
+				vitalSign.setPatientId("ag5rc21zZXJ2LTE1OTMwOHIUCxIHUGF0aWVudBiAgICAgIDJCAw");
+				vitalSignService.saveVitalSign(vitalSign);
+				vitalSignService.closeEntityManager(); */
+		
+			
+			/*
+				vitalSign.setBodyHeight(120);
+				vitalSign.setBodyWeight(50);
+				vitalSign.setBpDiastolic(92);
+				vitalSign.setBpSystolic(144);
+				vitalSign.setPulseRate(189);
+				vitalSign.setRespitoryRate(76);
+				vitalSign.setTemperature(34);
+				vitalSign.setCodeHN("88993564");
+				vitalSign.setPatientId("ag5rc21zZXJ2LTE1OTMwOHIUCxIHUGF0aWVudBiAgICAgIDJCQw");
+				vitalSignService.saveVitalSign(vitalSign);
+				vitalSignService.closeEntityManager(); */
+		
+			vitalSign.setBodyHeight(120);
+			vitalSign.setBodyWeight(50);
+			vitalSign.setBpDiastolic(84);
+			vitalSign.setBpSystolic(122);
+			vitalSign.setPulseRate(120);
+			vitalSign.setRespitoryRate(76);
+			vitalSign.setTemperature(34);
+			vitalSign.setCodeHN("12115487");
+			vitalSign.setPatientId("ag5rc21zZXJ2LTE1OTMwOHIUCxIHUGF0aWVudBiAgICAgICJCww");
+			vitalSignService.saveVitalSign(vitalSign);
+			vitalSignService.closeEntityManager(); 
+			
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "-1";
+		}
+
+		return "1";
+	}	
+	
+}
+
+
+
+

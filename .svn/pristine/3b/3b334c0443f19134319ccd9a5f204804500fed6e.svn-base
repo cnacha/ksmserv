@@ -1,0 +1,204 @@
+
+	<!-- Modal -->
+	<div id="editProfile" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Edit Profile</h4>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div style="padding-left: 3%">
+							<div class="input-group">
+								<span class="input-group-addon"> <i
+									class="material-icons">person</i>
+								</span>
+								<div class="form-line">
+									<input type="text" id="username-pro" class="form-control"
+										name="username-pro" placeholder="Username" required autofocus>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="form-line">
+									<input type="text" id="firstname-pro" name="firstname-pro"
+										required="required" class="form-control"
+										placeholder="Firstname" />
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="form-line">
+									<input type="text" id="lastname-pro" name="lastname-pro"
+										required="required" class="form-control"
+										placeholder="Lastname" />
+								</div>
+							</div>
+							<a data-toggle="modal" href="#changePass" type="button" class="btn btn-danger" data-dismiss="modal">Change Password</a>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-link waves-effect"
+						onclick="editPro()" data-dismiss="modal">SUBMIT</button>
+					<button type="button" class="btn btn-link waves-effect"
+						data-dismiss="modal">CLOSE</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /Modal -->
+	
+	<!-- Modal -->
+	<div id="changePass" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Change Password</h4>
+				</div>
+				<div class="modal-body">
+					<form>
+							<div class="input-group">
+								<span class="input-group-addon"> <i
+									class="material-icons">lock</i>
+								</span>
+								<div class="form-line">
+									<input type="password" id="password-pro" class="form-control"
+										name="password-pro" placeholder="Current password" required>
+								</div>
+							</div>
+							<div class="input-group">
+								<span class="input-group-addon"> <i
+									class="material-icons">lock</i>
+								</span>
+								<div class="form-line">
+									<input type="password" id="newpass" class="form-control"
+										name="password" placeholder="New password" required>
+								</div>
+							</div>
+							<div class="input-group">
+								<span class="input-group-addon"> <i
+									class="material-icons">lock</i>
+								</span>
+								<div class="form-line">
+									<input type="password" id="repass" class="form-control"
+										name="password" placeholder="Retype new password" required>
+								</div>
+							</div>
+						</div>
+					</form>
+				
+				<div class="modal-footer">
+					<button type="button" class="btn btn-link waves-effect"
+						onclick="changePass()" data-dismiss="modal">SUBMIT</button>
+					<button type="button" class="btn btn-link waves-effect"
+						data-dismiss="modal">CLOSE</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /Modal -->
+	
+	<!-- Jquery Core Js -->
+	<script src="plugins/jquery/jquery.min.js"></script>
+	<script>
+	var userId = "${sessionScope.userId}";
+	
+	
+	$(document).on("click", ".open-editProfile", function() {
+		$("#loader").show();
+		$
+				.ajax({
+					url : "../findUserByIdWS.do?userId="+userId,
+					type : "GET",
+					success : function(data) {
+						
+						var firstname = data.firstname;
+						var lastname = data.lastname;
+						var username = data.username;
+
+						$("#firstname-pro").val(firstname);
+						$("#lastname-pro").val(lastname);
+						$("#username-pro").val(username);
+						
+						$("#loader").hide();
+					},
+					error : function(data, status, er) {
+						//alert('error');
+						$("#loader").hide();
+					}
+				});
+	});
+	
+	function editPro() {
+		if ($.trim($('#username-pro').val()) == '' || $.trim($('#lastname-pro').val()) == '' || $.trim($('#firstname-pro').val()) == '') {
+			swal("Fail!", "Please fill all field", "warning");
+		} else {
+			$("#loader").show();
+			$.ajax({
+				url : "../admin/updateUserWS.do?userId="
+						+ userId + "&firstname="
+						+ $('#firstname-pro').val() + "&lastname="
+						+ $('#lastname-pro').val() + "&username="
+						+ $('#username-pro').val(),
+				type : "POST",
+				dataType : "JSON",
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					//alert('success');
+					swal("Success", "Your request has been done!", "success");
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					//alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+	}
+	
+	function changePass() {
+		if ($.trim($('#password-pro').val()) == '' || $.trim($('#newpass').val()) == '' || $.trim($('#repass').val()) == '') {
+			swal("Fail!", "Please fill all field", "warning");
+		} else {
+			if($('#newpass').val() != $('#repass').val()){
+				swal("Fail!", "Your new password is not match", "warning");
+			}else{
+				$("#loader").show();
+				$.ajax({
+					url : "../updatePatinetWS.do?userId="
+							+ userId + "&password="
+							+ $('#password-pro').val() + "&newpass="
+							+ $('#newpass').val(),
+					type : "POST",
+					dataType : "JSON",
+					contentType : "application/json",
+					mimeType : "application/json",
+					success : function(data) {
+						if(data == -1){
+							swal("Fail!", "Your password is not correct", "warning");
+						}else if(data == 1){
+							swal("Success", "Your password has been changed!", "success");
+						}else{
+							swal("Oops!", "Please try again later");
+						}
+						$('#password-pro').val();
+						$('#newpass').val();
+						$('#repass').val();
+						$("#loader").hide();
+					},
+					error : function(data, status, er) {
+						//alert('error');
+						$("#loader").hide();
+					}
+				});
+			}
+		}
+	}
+	</script>

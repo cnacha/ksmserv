@@ -1,0 +1,391 @@
+package com.mfu.web.controller;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.mfu.dao.Kmean.ImpacFactorClusterDAO;
+import com.mfu.dao.Kmean.ImpactFactorDAO;
+import com.mfu.dao.Kmean.SymptomDAO;
+import com.mfu.dao.Kmean.UserSymptomDAO;
+import com.mfu.dao.record.PatientDAO;
+import com.mfu.dao.record.VitalSignDAO;
+import com.mfu.entity.Kmean.ImpacFactorCluster;
+import com.mfu.entity.Kmean.ImpactFactor;
+import com.mfu.entity.Kmean.SymptomCluster;
+import com.mfu.entity.Kmean.TrainingDataSet;
+import com.mfu.entity.Kmean.Symptom;
+import com.mfu.entity.Kmean.UserSymptom;
+import com.mfu.entity.record.Patient;
+import com.mfu.entity.record.VitalSign;
+import com.mfu.entity.record.VitalSignRecord;
+
+import kmt.Cc;
+import kmt.Cluster;
+import kmt.KMeanEngine;
+import kmt.Point;
+import kmt.Pp;
+import kmt.km;
+
+@Controller
+public class KMeanClusterController {
+
+	// ----------------------------------- SYMTOM CONTROLLER
+	// ------------------------------------------------
+	private static final Logger log = Logger.getLogger(KMeanClusterController.class.getName());
+
+	@RequestMapping(value = "/listSymtomWS", method = RequestMethod.GET)
+	@ResponseBody
+	public List<Symptom> listSymtomWS(HttpServletRequest request) {
+
+		SymptomDAO SymtomServ = new SymptomDAO();
+		List<Symptom> symtom = SymtomServ.getAllSymptom();
+		SymtomServ.closeEntityManager();
+		return symtom;
+	}
+
+	@RequestMapping(value = "/saveSymtomWS", method = RequestMethod.POST)
+	@ResponseBody
+	public String saveSymtomWS(@RequestBody Symptom symptom,
+			HttpServletRequest request) {
+
+		SymptomDAO SymtomServ = new SymptomDAO();
+		try {
+			if (symptom.getKey() == null)
+				SymtomServ.saveSyntom(symptom);
+			else
+				SymtomServ.updateSyntom(symptom);
+			return "1";
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			SymtomServ.closeEntityManager();
+		}
+		return "-1";
+	}
+
+	@RequestMapping(value = "/deleteSymtomWS", method = RequestMethod.DELETE)
+	public @ResponseBody String deleteSymtomWS(HttpServletRequest request) {
+
+		try {
+
+			SymptomDAO SymtomServ = new SymptomDAO();
+			SymtomServ.deleteSyntom(request.getParameter("key"));
+			SymtomServ.closeEntityManager();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "-1";
+		}
+
+		return "1";
+	}
+
+	// ----------------------------------- IMPACFACTOR CONTROLLER
+	// ------------------------------------------------
+
+	@RequestMapping(value = "/listImpactFactorBySymptomIdWS", method = RequestMethod.GET)
+	@ResponseBody
+	public List<ImpactFactor> findImpactFactorByIdWS(HttpServletRequest request) {
+
+		List<ImpactFactor> impactfactor = null;
+		ImpactFactorDAO ImpactService = new ImpactFactorDAO();
+		try {
+
+			impactfactor = ImpactService.getSyntomTamplateBySymptomID(request
+					.getParameter("symtomID"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		ImpactService.closeEntityManager();
+		return impactfactor;
+	}
+
+	@RequestMapping(value = "/saveImpactFactorWS", method = RequestMethod.POST)
+	@ResponseBody
+	public String saveImpactFactorWS(@RequestBody ImpactFactor impactfactor,
+			HttpServletRequest request) {
+
+		ImpactFactorDAO ImpactService = new ImpactFactorDAO();
+		try {
+			if (impactfactor.getKey() == null)
+				ImpactService.saveImpactFactor(impactfactor);
+			else
+				ImpactService.updateImpactFactor(impactfactor);
+			return "1";
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			ImpactService.closeEntityManager();
+		}
+		return "-1";
+	}
+
+	@RequestMapping(value = "/deleteImpactFactorWS", method = RequestMethod.DELETE)
+	public @ResponseBody String removeImpactFactor(HttpServletRequest request) {
+
+		try {
+			ImpactFactorDAO ImpactService = new ImpactFactorDAO();
+			ImpactService.deleteImpactFactor(request.getParameter("key"));
+			ImpactService.closeEntityManager();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "-1";
+		}
+
+		return "1";
+	}
+
+	@RequestMapping(value = "/LearnWS", method = RequestMethod.POST)
+	public String Learn(@RequestBody TrainingDataSet dataset,
+			HttpServletRequest request) {
+		try {
+			// km kmeans = new km();
+			KMeanEngine kmeans = new KMeanEngine();
+			kmeans.init(dataset.getInitialPoint(), dataset.getSamplingPoint());
+			// kmeans.init(learn.getX(),learn.getY());
+			List<Point> lastCentroids = kmeans.learn();
+
+			// ImpacFactorClusterDAO imold = new ImpacFactorClusterDAO();
+			SymptomDAO symDAO = new SymptomDAO();
+			log.info("LearningController " + dataset.getSymptomKey());
+			List<SymptomCluster> clusterList =null;
+			try {
+				// List<ImpacFactorCluster> clusterList =
+				// imold.findClusteringByImpactFactorID(dataset.getKeyString());
+				clusterList = symDAO.findClusteringBySymptom(dataset
+						.getSymptomKey());
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				symDAO.closeEntityManager();
+			}
+			SymptomDAO writeOperator;
+			if (clusterList != null && clusterList.size()>0) {
+				for (SymptomCluster cluster : clusterList) {
+					writeOperator = new SymptomDAO();
+					cluster.setCentroid(lastCentroids.get(cluster.getLevel())
+							.getCoordinate());
+					writeOperator.updateSymtomCluster(cluster);
+					writeOperator.closeEntityManager();
+					/**
+					 * imoldWriteOperator = new ImpacFactorClusterDAO();
+					 * cluster.
+					 * setCentroidX(lastCentroids.get(cluster.getLevel())
+					 * .getX());
+					 * cluster.setCentroidY(lastCentroids.get(cluster.getLevel
+					 * ()).getY());
+					 * imoldWriteOperator.updateClustering(cluster);
+					 * imoldWriteOperator.closeEntityManager();
+					 **/
+				}
+			} else {
+				for (int i = 0; i < lastCentroids.size(); i++) {
+					writeOperator = new SymptomDAO();
+					SymptomCluster cluster = new SymptomCluster();
+					cluster.setLevel(i);
+					cluster.setCentroid(lastCentroids.get(i).getCoordinate());
+					cluster.setSymptomKey(dataset.getSymptomKey());
+					writeOperator.saveSymtomCluster(cluster);
+					writeOperator.closeEntityManager();
+					/**
+					 * imoldWriteOperator = new ImpacFactorClusterDAO();
+					 * ImpacFactorCluster cluster = new ImpacFactorCluster();
+					 * cluster.setImpactFactorID(dataset.getKeyString());
+					 * cluster.setImName(dataset.impactName);
+					 * cluster.setSymptomName(dataset.symptomName);
+					 * cluster.setCentroidX(lastCentroids.get(i).getX());
+					 * cluster.setCentroidY(lastCentroids.get(i).getY());
+					 * cluster.setLevel(i);
+					 * imoldWriteOperator.saveClustering(cluster);
+					 * imoldWriteOperator.closeEntityManager();
+					 **/
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "-1";
+		}
+
+		return "1";
+	}
+	
+	public void classifySymptom(VitalSignRecord rec){
+		SymptomDAO sDAO = new SymptomDAO();
+		ImpactFactorDAO iDAO = new ImpactFactorDAO();
+		UserSymptomDAO usDAO = new UserSymptomDAO();
+		PatientDAO pDAO = new PatientDAO();
+		try{
+			Patient patient = pDAO.findPatientsByHospitalNumber(rec.getCodeHN());
+			List<Symptom> stList = sDAO.getAllSymptom();
+			for(Symptom s: stList){
+				// load symptom clusters
+				List<SymptomCluster> sClusterList = sDAO.findClusteringBySymptom(s.getKeyString());
+				List<Cluster> cList = new ArrayList<Cluster>();
+				int i=0;
+				for(SymptomCluster scluster :sClusterList){
+					cList.add(scluster.convert(scluster.getLevel()));
+					i++;
+				}
+				// get impact factor
+				List<ImpactFactor> factorList = iDAO.getSyntomTamplateBySymptomID(s.getKeyString());
+	
+				// setup coordinate
+				ArrayList<Double> coordinate = new ArrayList<Double>();
+				String factorName;
+				String strippedFactorName;
+				for(ImpactFactor factor: factorList){
+					factorName = factor.getimpactName();
+					strippedFactorName = factorName.substring(factorName.indexOf(".")+1);
+					log.info("	getting prop: "+strippedFactorName);
+					if(factorName.startsWith("profile")){
+						String methodName = "get"+strippedFactorName.substring(0, 1).toUpperCase() + strippedFactorName.substring(1);
+						log.info("		getting profile: "+methodName);
+						try {
+							//Object value = patient.getClass().getMethod(methodName).invoke(patient);
+							coordinate.add(Double.parseDouble(""+patient.getClass().getMethod(methodName).invoke(patient)));
+								
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					} else if(factorName.startsWith("vitalsign")){
+						coordinate.add(rec.getMeasureValue(strippedFactorName));
+					}
+				
+				}
+				// find cluster based on user vital sign record
+				log.info("coordinate.size(): "+coordinate.size());
+				double[] coor = new double[coordinate.size()];
+				for(int j=0; j<coordinate.size();j++){
+					coor[j] = coordinate.get(j).doubleValue();
+				}
+				
+				Point userConditionPoint = new Point(coor);
+				log.info("classifying Point: "+userConditionPoint.toString());
+				Cluster foundCluster = userConditionPoint.findCluster(cList);
+				
+				UserSymptom usersymp = usDAO.findUserSymptom(patient.getKeyString(), s.getSymptomName());
+				UserSymptomDAO writerOpt = new UserSymptomDAO();
+				if(usersymp == null){
+					
+					usersymp = new UserSymptom();
+					usersymp.setPatientID(patient.getKeyString());
+					usersymp.setSymptomlevel(foundCluster.getId());
+					usersymp.setSymptomName(s.getSymptomName());
+					writerOpt.saveUserSymptom(usersymp);
+					writerOpt.closeEntityManager();
+					log.info("saving user symptom");
+				} else {
+					usersymp.setSymptomlevel(foundCluster.getId());
+					writerOpt.updateUserSymptom(usersymp);
+					writerOpt.closeEntityManager();
+					log.info("updating user symptom");
+				}
+				
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			sDAO.closeEntityManager();
+			iDAO.closeEntityManager();
+			usDAO.closeEntityManager();
+			pDAO.closeEntityManager();
+		}
+	}
+
+	@RequestMapping(value = "/classiflySymptomWS", method = RequestMethod.GET)
+	@ResponseBody
+	public void classifySymptomWS(HttpServletRequest request) {
+		VitalSignDAO vDAO = new VitalSignDAO();
+		VitalSignRecord rec = vDAO.findLastVitalSignByHN(request.getParameter("codeHN"));
+		log.info(" found rec "+rec.getMeasures());
+		classifySymptom(rec);
+		
+	/**	UserSymptomDAO usedao = new UserSymptomDAO();
+		ImpacFactorClusterDAO imdao = new ImpacFactorClusterDAO();
+		List<ImpacFactorCluster> im = null;
+		PatientDAO pdao = new PatientDAO();
+		Patient patient = new Patient();
+		List<VitalSign> vital = null;
+		try {
+			patient = pdao.findPatientsByHospitalNumber(request
+					.getParameter("HNcode"));
+			im = imdao.TakeAllClusteringBySymptom(request
+					.getParameter("SymptomName"));
+
+			vital = pdao.getVitalSignByPatient(patient.getKeyString());
+			double vitalValue[] = new double[3];
+			for (int i = 0; i < vital.size(); i++) {
+				vitalValue[i] = vital.get(i).getPulseRate();
+				vitalValue[i + 1] = vital.get(i).getBpDiastolic();
+				vitalValue[i + 2] = vital.get(i).getBpSystolic();
+			}
+			int clusterResult[] = new int[vitalValue.length];
+			int count = 0;
+			List<Cc> clusters = new ArrayList<Cc>();
+			for (int i = 0; i < im.size(); i++) {
+				Cc cluster = new Cc(i);
+				Pp centroid = Pp.setXaxisAndYaxisD(im.get(i).getCentroidX(), im
+						.get(i).getCentroidY());
+				cluster.setCentroid(centroid);
+				clusters.add(cluster);
+				if (im.get(i).getLevel() == 2) {
+					Date date = new Date();
+					double age = ((patient.getBirthdate().getYear() - date
+							.getYear()) * (-1));
+					double impact = vitalValue[count];
+					for (int j = 0; j < 1; j++) {
+						Pp p = Pp.setXaxisAndYaxisD(age, impact);
+						log.info("POINT: " + p.toString());
+						Cc c = p.findCluster(clusters);
+						log.info("		result is Cluster " + c.getId()
+								% 3);
+						clusterResult[count] = c.getId() % 3;
+					}
+					count++;
+					clusters.clear();
+				}
+
+			}
+
+			int resultClassifly = (int) (clusterResult[0] + clusterResult[1] + clusterResult[2]) / 3;
+			String resultLevel;
+			if (resultClassifly == 2) {
+				resultLevel = "Disease";
+			} else if (resultClassifly == 1) {
+				resultLevel = "Risk";
+			} else {
+				resultLevel = "Normal";
+			}
+			log.info("\n--> " + patient.getFirstname() + " "
+					+ patient.getLastname() + " <-- " + "you are in "
+					+ resultLevel + " Group of " + im.get(0).getSymptomName()
+					+ "!!");
+
+			UserSymptom usersymp = new UserSymptom();
+			usersymp.setPatientID(patient.getKeyString());
+			usersymp.setSymptomlevel(resultClassifly);
+			usersymp.setSymptomName(im.get(0).getSymptomName());
+			usedao.saveUserSymptom(usersymp);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		usedao.closeEntityManager();
+		pdao.closeEntityManager();
+		imdao.closeEntityManager();
+		**/
+	}
+	
+}

@@ -1,0 +1,47 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+pageEncoding="ISO-8859-1"%>
+<%@ page import="com.mfu.entity.survey.*"%>
+<%@ page import="com.mfu.dao.survey.*"%>
+<%@ page import="com.mfu.*"%>
+<%@ page import="java.util.*"%>
+<%@ page import="javax.persistence.*"%>
+<%@ page import="com.google.appengine.api.blobstore.*"%>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+		<%
+			String title = request.getParameter("title");
+			String description = request.getParameter("description");
+			String caption = request.getParameter("caption");
+			String level = request.getParameter("level");
+			String target = request.getParameter("target");
+
+			Promotion promo = new Promotion();
+			promo.setTitle(title);
+			promo.setDescription(description);
+			promo.setLevel(level);
+			promo.setCaption(caption);
+			promo.setTarget(target);
+	
+			
+			BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+			Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
+			List<BlobKey> blobKeys = blobs.get("photo");
+			if (blobKeys != null && blobKeys.size() > 0) {
+				promo.setPhoto( blobKeys.get(0).getKeyString());
+			}
+			
+			PromotionDAO dao = new PromotionDAO();
+			dao.savePromotion(promo);
+			dao.closeEntityManager();
+		%>
+			Create Success!!<BR/>
+			<a href="/Promotion.do">List Promotion</a>
+
+</body>
+</html>

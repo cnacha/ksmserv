@@ -1,0 +1,128 @@
+package com.mfu.dao.survey;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+
+import com.mfu.entity.survey.FilledForm;
+import com.mfu.entity.survey.FilledItem;
+
+public class FilledFormDAO {
+	private static final EntityManagerFactory emfInstance = Persistence
+			.createEntityManagerFactory("transactions-optional");
+	private EntityManager em = null;
+
+	public FilledFormDAO() {
+		em = emfInstance.createEntityManager();
+	}
+
+	public List<FilledForm> getAllFilledForm() {
+		List<FilledForm> form = null;
+		try {
+			Query q = em.createQuery("select p from FilledForm p");
+			form = q.getResultList();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return form;
+	}
+
+	public FilledForm findFilledFormByKey(String key) {
+
+		FilledForm form = null;
+		try {
+
+			Query q = em
+					.createQuery("select p from FilledForm p where p.key =:key");
+			q.setParameter("key", key);
+			List<FilledForm> fom = q.getResultList();
+			form = fom.get(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return form;
+	}
+
+	public void deleteFilledForm(String key) {
+		FilledForm form = this.findFilledFormByKey(key);
+		if (form != null)
+			em.remove(form);
+	}
+
+	public FilledForm saveFilledForm(FilledForm form) {
+
+		try {
+			EntityTransaction transaction = em.getTransaction();
+			transaction.begin();
+			 em.persist(form);
+			 transaction.commit();
+			// em.flush();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return form;
+	}
+
+	public void updateFilledForm(FilledForm form) {
+		try {
+			em.merge(form);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void closeEntityManager() {
+		if (em != null)
+			em.close();
+	}
+	
+	public FilledItem saveFilledItem(FilledItem item) {
+
+		try {
+			EntityTransaction transaction = em.getTransaction();
+			transaction.begin();
+			em.persist(item);
+			transaction.commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return item;
+	}
+	
+	public List<FilledForm> findFilledFormByUser(String userId) {
+
+		try {
+
+			Query q = em
+					.createQuery("select p from FilledForm p where p.userId =:userId");
+			q.setParameter("userId", userId);
+			return q.getResultList();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public FilledForm findFilledFormByVoucherCode(String code) {
+		FilledForm form = null;
+		try {
+
+			Query q = em
+					.createQuery("select p from FilledForm p where p.voucherCode =:code");
+			q.setParameter("code", code);
+			List<FilledForm> fom = q.getResultList();
+			if(fom.size()==0){
+				return null;
+			}else{
+					form = fom.get(0);
+				}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return form;
+	}
+}

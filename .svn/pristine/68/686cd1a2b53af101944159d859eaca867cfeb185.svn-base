@@ -1,0 +1,1111 @@
+<%@ page errorPage="../login.do"%>
+<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport">
+<title>Welcome To | Appointment Management</title>
+<!-- Favicon-->
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+
+<!-- Google Fonts -->
+<link
+	href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext"
+	rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+	rel="stylesheet" type="text/css">
+
+<!-- Bootstrap Core Css -->
+<link href="../plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+<!-- Waves Effect Css -->
+<link href="../plugins/node-waves/waves.css" rel="stylesheet" />
+
+<!-- Animation Css -->
+<link href="../plugins/animate-css/animate.css" rel="stylesheet" />
+
+<!-- Sweetalert Css -->
+<link href="../plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+
+<!-- Custom Css -->
+<link href="../css/style.css" rel="stylesheet">
+
+<!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
+<link href="../css/themes/all-themes.css" rel="stylesheet" />
+</head>
+
+<body class="theme-purple"
+	onload="intialDate();listAppointmentPick();storeDoctorInfo();listPatients();">
+	<!-- Page Loader -->
+	<div class="page-loader-wrapper">
+		<div class="loader">
+			<div class="preloader">
+				<div class="spinner-layer pl-purple">
+					<div class="circle-clipper left">
+						<div class="circle"></div>
+					</div>
+					<div class="circle-clipper right">
+						<div class="circle"></div>
+					</div>
+				</div>
+			</div>
+			<p>Please wait...</p>
+		</div>
+	</div>
+	<!-- #END# Page Loader -->
+	<!-- Overlay For Sidebars -->
+	<div class="overlay"></div>
+	<!-- #END# Overlay For Sidebars -->
+	<%@ include file="./sidebar.jsp"%>
+
+	<section class="content">
+		<div class="container-fluid">
+			<div class="block-header">
+				<h2>
+					<span id="doctorName"></span>'s appointment list
+				</h2>
+			</div>
+			<!-- Basic Examples -->
+			<div class="row clearfix">
+				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+					<div class="card">
+						<div class="body">
+							<!-- Nav tabs -->
+							<ul class="nav nav-tabs tab-nav-right tab-col-lime"
+								role="tablist">
+								<li role="presentation" class="active"><a href="#index"
+									data-toggle="tab">Appointment List</a></li>
+							</ul>
+
+							<!-- Tab panes -->
+							<div class="tab-content">
+								<div role="tabpanel" class="tab-pane fade in active" id="index">
+
+									<button class="btn bg-red pull-right" data-toggle="modal"
+										id="addLeaveButton" data-target="#addLeave">
+										<span class="fa fa-plus" style="color: white"></span> Add
+										leave day
+									</button>
+
+									<button class="btn btn-info pull-right" id="addAppButton"
+										data-toggle="modal" data-target="#addApp"
+										style="margin: 0px 20px">
+										<span class="fa fa-plus" style="color: white;"></span> New
+										Appointment
+									</button>
+
+
+									<div class="col-sm-4">
+										<div class="form-group">
+											<div class="form-line">
+												<input type="date" name="datePick"
+													onchange="listAppointmentPick();" id="datePick"
+													class="datepicker form-control">
+											</div>
+										</div>
+									</div>
+									<div class="clearfix"></div>
+									<table id="datatable"
+										class="table table-bordered table-striped table-hover appointmentTable">
+										<thead>
+											<tr>
+												<th>Start Time</th>
+												<th>End Time</th>
+												<th>Patient's HN</th>
+												<th>Patient Name</th>
+												<th>Specialty</th>
+												<th>&nbsp;</th>
+												<th>&nbsp;</th>
+											</tr>
+										</thead>
+									</table>
+									<div class="clearfix"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- #END# Basic Examples -->
+		</div>
+	</section>
+
+	<%@include file="../settings.jsp"%>
+	<form:form id="loginForm" method="post" action="../login.do"
+		modelAttribute="loginBean">
+	</form:form>
+
+	<!-- Modal -->
+	<div id="editApp" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Edit an appointment</h4>
+				</div>
+				<div class="modal-body">
+					<h4>Appointment information</h4>
+					<hr>
+					<div class="col-lg-12" id="calendar3"></div>
+					<div class="form-group">
+						<div class="form-line">
+							<input type="date" name="editAppointmentDate"
+								id="editAppointmentDate" class="datepicker form-control"
+								onchange="listPreferTimeEdit()">
+						</div>
+					</div>
+					<div class="form-group">
+						<label style="padding-left: 0px"
+							class="col-md-2 col-sm-2 col-xs-12">Time <span
+							class="required">*</span>
+						</label>
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<select class="form-control listTime2" id="editAppointmentTime"
+								style="color: #73879c; font-size: 98%">
+							</select>
+							<h6>* Show only available times</h6>
+						</div>
+					</div>
+					<div class="clearfix"></div>
+					<br>
+					<h4>Patient information</h4>
+					<hr>
+
+					<div class="form-group">
+						<label class="control-label col-md-4 col-sm-4 col-xs-12">Hospital
+							Number </label>
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<p style="padding-top: 9px" id="hospitalNumber">1234</p>
+						</div>
+					</div>
+					<div class="clearfix"></div>
+					<br>
+					<div class="form-group">
+						<label class="control-label col-md-4 col-sm-4 col-xs-12">Name</label>
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<p style="padding-top: 9px" id="name">Name</p>
+						</div>
+					</div>
+					<input type="hidden" name="appointmentId" value=""
+						id="appointmentId" /> <input type="hidden" name="patientId"
+						value="" id="patientId" /> <input type="hidden" name="doctorId"
+						value="" id="doctorId" /> <input type="hidden" name="status"
+						value="" id="status" /> <input type="hidden" name="preferDate1"
+						value="" id="preferDate1" /><input type="hidden"
+						name="preferDate2" value="" id="preferDate2" /> <input
+						type="hidden" name="preferTime1" value="" id="preferTime1" /><input
+						type="hidden" name="preferTime2" value="" id="preferTime2" />
+					<div class="clearfix"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-link waves-effect"
+						name="btnSubmitEditAppointment" id="btnSubmitEditAppointment"
+						onclick="updateAppointment()" data-dismiss="modal">SAVE
+						CHANGES</button>
+					<button type="button" class="btn btn-link waves-effect"
+						data-dismiss="modal">CLOSE</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<!-- /Modal -->
+
+	<!-- Modal -->
+	<div id="addApp" class="modal fade" role="dialog">
+		<div class="modal-dialog modal-lg">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Make an appointment</h4>
+				</div>
+				<div class="modal-body">
+					<div class="col-lg-6 col-md-12 col-xs-12" style="padding:0px">
+						<h4>Appointment information</h4>
+						<hr>
+						<div class="form-group">
+							<label class="control-label col-md-4 col-sm-4 col-xs-12">Specialty
+							</label>
+							<div class="col-md-6 col-sm-6 col-xs-12">
+								<p id="makeAppointmentSpecialty" style="padding-top: 9px"></p>
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						<br>
+						<div class="form-group">
+							<label class="control-label col-md-4 col-sm-4 col-xs-12">Requested
+								Doctor</label>
+							<div class="col-md-6 col-sm-6 col-xs-12">
+								<p id="makeAppointmentDoctorName" style="padding-top: 9px"></p>
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						<br>
+						<div class="form-group">
+							<label class="control-label col-md-4 col-sm-4 col-xs-12">Date
+								<span class="required">*</span>
+							</label>
+							<div class="col-md-6 col-sm-6 col-xs-12">
+								<input type="date" name="makeAppointmnetDate"
+									id="makeAppointmnetDate" class="datepicker form-control"
+									onchange="listPreferTime()">
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						<br>
+						<div class="form-group">
+							<label class="control-label col-md-4 col-sm-4 col-xs-12">Time
+								<span class="required">*</span>
+							</label>
+							<div class="col-md-6 col-sm-6 col-xs-12">
+								<select id="makeAppointmentTime" class="form-control listTime"
+									style="color: #73879c; font-size: 98%">
+									<option disabled selected>Choose date first...</option>
+
+								</select>
+								<h6>* Show only available times</h6>
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						<br>
+						<div class="form-group">
+							<label class="control-label col-md-4 col-sm-4 col-xs-12">Initial
+								symptoms </label>
+							<div class="col-md-6 col-sm-6 col-xs-12">
+								<div class="form-group">
+									<div class="form-line">
+										<textarea rows="3" id="makeAppointmentInitialSymptoms"
+											class="form-control no-resize"
+											placeholder="Please initial symptoms..."></textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						<h4>Patient information</h4>
+						<hr>
+
+						<div class="form-group">
+							<label class="control-label col-md-4 col-sm-4 col-xs-12">Hospital
+								Number (HN)<span class="required">*</span>
+							</label>
+							<div class="col-md-6 col-sm-6 col-xs-12">
+								<input list="patients" name="patient" id="makeAppointmentPatient"
+									class="form-control" required="required"
+									style="border-bottom: 1px solid #D5D5D5;">
+								<datalist id="patients" class="listPatient">
+									<option></option>
+								</datalist>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6 col-md-12 col-xs-12" style="padding:0px">
+						<div class="col-lg-12" id="calendar" ></div>
+						<div class="col-lg-12">
+						<br>
+						<h5>Working Days</h5>
+						<input type="checkbox" id="monday" class="filled-in chk-col-amber" checked disabled /> <label 
+						for="monday">Monday</label> <input type="checkbox" id="tuesday" class="filled-in chk-col-pink" checked disabled /> 
+						<label for="tuesday">Tuesday</label> <input type="checkbox" id="wednesday" 
+						class="filled-in chk-col-light-green" checked disabled /> <label for="wednesday">Wednesday</label>
+						<input type="checkbox" id="thursday" class="filled-in chk-col-orange"
+						checked disabled /> <label for="thursday">Thursday</label> <input type="checkbox" id="friday" 
+						class="filled-in chk-col-indigo" checked disabled /> <label for="friday">Friday</label> <input
+						type="checkbox" id="saturday" class="filled-in chk-col-purple" checked disabled /> 
+						<label for="saturday">Saturday</label> <input type="checkbox" id="sunday" class="filled-in chk-col-red"
+						checked disabled /> <label for="sunday">Sunday</label>
+						</div>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+				<div class="modal-footer">
+					<a class="btn btn-link waves-effect"
+						name="btnSubmitCreateAppointment" id="btnSubmitCreateAppointment"
+						onclick="createAppointment();" data-dismiss="modal">SUBMIT</a>
+					<button type="button" class="btn btn-link waves-effect"
+						data-dismiss="modal">CLOSE</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<!-- /Modal -->
+
+	<!-- Modal -->
+	<div id="addLeave" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Add leave day</h4>
+				</div>
+				<div class="modal-body">
+					<div class="col-lg-6 col-md-6 col-sm-12">
+						<strong>Start leave date</strong>
+						<div class="form-group">
+							<div class="form-line">
+								<input type="date" id="startLeaveDate"
+									class="datepicker form-control">
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-6 col-md-6 col-sm-12">
+						<strong>End leave date</strong>
+						<div class="form-group">
+							<div class="form-line">
+								<input type="date" id="endLeaveDate"
+									class="datepicker form-control">
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-12">
+						<p>
+							<strong>Leave time : </strong> All day <small>(8:00 -
+								16:00)</small>
+						</p>
+					</div>
+					<div class="clearfix"></div>
+					<br>
+					<div class="col-lg-12" id="calendar2"></div>
+					<div class="clearfix"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-link waves-effect"
+						onclick="createLeaveDay()" data-dismiss="modal">SUBMIT</button>
+					<button type="button" class="btn btn-link waves-effect"
+						data-dismiss="modal">CLOSE</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<!-- /Modal -->
+
+	<!-- Jquery Core Js -->
+	<script src="../plugins/jquery/jquery.min.js"></script>
+
+	<!-- Bootstrap Core Js -->
+	<script src="../plugins/bootstrap/js/bootstrap.js"></script>
+
+
+	<!-- Slimscroll Plugin Js -->
+	<script src="../plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
+
+	<!-- Waves Effect Plugin Js -->
+	<script src="../plugins/node-waves/waves.js"></script>
+
+	<!-- Autosize Plugin Js -->
+	<script src="../plugins/autosize/autosize.js"></script>
+
+	<!-- SweetAlert Plugin Js -->
+	<script src="../plugins/sweetalert/sweetalert.min.js"></script>
+
+	<!-- Moment Plugin Js -->
+	<script src="../plugins/momentjs/moment.js"></script>
+
+	<!-- Jquery DataTable Plugin Js -->
+	<script src="../js/datatables.net/js/jquery.dataTables.min.js"></script>
+	<script src="../js/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+	<!-- Custom Js -->
+	<script src="../js/admin.js"></script>
+	<script src="../js/pages/forms/basic-form-elements.js"></script>
+	<script src="../js/pages/ui/dialogs.js"></script>
+
+	<!-- Demo Js -->
+	<script src="../js/demo.js"></script>
+
+	<script type="text/javascript">
+		var checkSubmitDisabled = false;
+		var patientSelection = "0";
+
+		$(document).ready(function() {
+			$('#btnSubmitCreateAppointment').prop('disabled', 'disabled');
+
+		});
+
+		$(document).ready(function() {
+			$('#btnSubmitEditAppointment').prop('disabled', 'disabled');
+
+		});
+
+		function storeDoctorInfo() {
+
+			var doctorId = readCookie('doctor');
+
+			$
+					.ajax({
+						url : "../findDoctorById.do?doctorId=" + doctorId,
+						type : "GET",
+						dataType : "JSON",
+						contentType : "application/json",
+						mimeType : "application/json",
+						success : function(data) {
+							writeCookie("doctoerFirstname", data.firstname, 1);
+							writeCookie("doctorLastname", data.lastname, 1);
+							writeCookie("doctorSpecialty", data.specialty, 1);
+							writeCookie("doctorEmail", data.email, 1);
+
+							$("#doctorName").html(
+									readCookie("doctoerFirstname") + " "
+											+ readCookie("doctorLastname"));
+							$("#makeAppointmentSpecialty").html(
+									readCookie("doctorSpecialty"));
+							$("#makeAppointmentDoctorName").html(
+									readCookie("doctoerFirstname") + " "
+											+ readCookie("doctorLastname"));
+
+							var doctorEmail = readCookie("doctorEmail");
+							$("#calendar")
+									.html(
+											"<iframe src=\"https://calendar.google.com/calendar/embed?src="
+													+ doctorEmail
+													+ "\" style=\"border: 0;width:100%; height:350px\" frameborder=\"0\" scrolling=\"no\"></iframe>");
+							$("#calendar2")
+							.html(
+									"<iframe src=\"https://calendar.google.com/calendar/embed?src="
+											+ doctorEmail
+											+ "\" style=\"border: 0;width:100%; height:350px\" frameborder=\"0\" scrolling=\"no\"></iframe>");
+							$("#calendar3")
+							.html(
+									"<iframe src=\"https://calendar.google.com/calendar/embed?src="
+											+ doctorEmail
+											+ "\" style=\"border: 0;width:100%; height:350px\" frameborder=\"0\" scrolling=\"no\"></iframe>");
+							
+							if (data.monday == 0) {
+								document.getElementById("monday").checked = false;
+							} else {
+								document.getElementById("monday").checked = true;
+							}
+							if (data.tuesday == 0) {
+								document.getElementById("tuesday").checked = false;
+							} else {
+								document.getElementById("tuesday").checked = true;
+							}
+							if (data.wednesday == 0) {
+								document.getElementById("wednesday").checked = false;
+							} else {
+								document.getElementById("wednesday").checked = true;
+							}
+							if (data.thursday == 0) {
+								document.getElementById("thursday").checked = false;
+							} else {
+								document.getElementById("thursday").checked = true;
+							}
+							if (data.friday == 0) {
+								document.getElementById("friday").checked = false;
+							} else {
+								document.getElementById("friday").checked = true;
+							}
+							if (data.saturday == 0) {
+								document.getElementById("saturday").checked = false;
+							} else {
+								document.getElementById("saturday").checked = true;
+							}
+							if (data.sunday == 0) {
+								document.getElementById("sunday").checked = false;
+							} else {
+								document.getElementById("sunday").checked = true;
+							}
+						},
+						error : function(data, status, er) {
+							//alert('error');
+							$("#loader").hide();
+						}
+					});
+
+		}
+
+		var currentPickDate = '';
+
+		function intialDate() {
+			var today = new Date();
+			var dd = today.getDate();
+			var mm = today.getMonth() + 1; //January is 0!
+			var yyyy = today.getFullYear();
+
+			if (dd < 10) {
+				dd = '0' + dd
+			}
+
+			if (mm < 10) {
+				mm = '0' + mm
+			}
+
+			today = yyyy + '-' + mm + '-' + dd;
+
+			currentPickDate = today.toString();
+
+			$('#datePick').val(today);
+
+		}
+
+		function successalert(number) {
+			if (number == 1) {
+				swal("Success", "Your request has been done!", "success");
+				setTimeout(function() {
+					listAppointmentPick();
+				}, 5000);
+			}
+		}
+
+		function onclickCancelAppointment(appointmentId, preferDate, doctorId,
+				patientId, status, preferChoice, preferTime, preferDate2,
+				preferTime2) {
+			swal({
+				title : "Are you sure?",
+				text : "You will not be able to recover",
+				type : "warning",
+				showCancelButton : true,
+				confirmButtonColor : "#DD6B55",
+				confirmButtonText : "Yes, cancel it!",
+				closeOnConfirm : false,
+				html : false
+			}, function() {
+				removeAppointment(appointmentId, preferDate, doctorId,
+						patientId, status, preferChoice, preferTime,
+						preferDate2, preferTime2);
+				swal("Canceled!", "This appointment has been canceled.",
+						"success");
+				setTimeout(function() {
+					listAppointmentPick();
+				}, 4000);
+
+			});
+		}
+
+		function onclickCancelLeaveDay(appointmentId) {
+			swal({
+				title : "Are you sure?",
+				text : "You will not be able to recover",
+				type : "warning",
+				showCancelButton : true,
+				confirmButtonColor : "#DD6B55",
+				confirmButtonText : "Yes, cancel it!",
+				closeOnConfirm : false,
+				html : false
+			}, function() {
+				removeLeaveday(appointmentId);
+				swal("Canceled!", "Leave day has been canceled.", "success");
+				setTimeout(function() {
+					listAppointmentPick();
+				}, 4500);
+
+			});
+		}
+
+		function listAppointmentPick() {
+			document.getElementById("addAppButton").disabled = false;
+			document.getElementById("addLeaveButton").disabled = false;
+			var doctorId = readCookie('doctor');
+			var newCurrentDate = $('#datePick').val().toString();
+			currentPickDate = newCurrentDate;
+			$("#loader").show();
+			$
+					.ajax({
+						url : "../listAppointmentByDoctorAndDateIdWS.do?doctorId="
+								+ doctorId + "&date=" + newCurrentDate,
+						type : "GET",
+						dataType : "JSON",
+						contentType : "application/json",
+						mimeType : "application/json",
+						success : function(data) {
+							var html = '';
+							html += "<thead>";
+							html += "<tr>";
+							html += "<th>Start Time</th>" + "<th>End Time</th>"
+									+ "<th>Patient's HN</th>"
+									+ "<th>Patient Name</th>"
+									+ "<th>Specialty</th>" + "<th>&nbsp;</th>"
+									+ "<th>&nbsp;</th>"
+							html += "</tr>";
+							html += "</thead>";
+							html += "<tbody>";
+							if (data.length == 0) {
+								html += "<tr><td colspan=\"7\">No appointment and leave day</td></tr>";
+							}
+							for (var i = 0; i < data.length; i++) {
+								if (data[i].status == 1 || data[i].status == 4
+										|| data[i].status == 5
+										|| data[i].status == -1) {
+
+									html += "<tr>";
+									html += "<td>" + data[i].startDateTime
+											+ "</td>" + "<td>"
+											+ data[i].endDateTime + "</td>";
+									if (data[i].status == -1) {
+										html += "<td> - </td>"
+												+ "<td> - </td>"
+												+ "<td> - </td>"
+												+ "<td colspan=\"2\"><a role=\"button\" class=\"btn bg-red btn-sm btn-block\" onclick=\"onclickCancelLeaveDay('"
+												+ data[i].keyString
+												+ "')\">Delete leave event</a></td>";
+									} else {
+										html += "<td>"
+												+ data[i].patient.codeHN
+												+ "</td>"
+												+ "<td>"
+												+ data[i].patient.firstname
+												+ " "
+												+ data[i].patient.lastname
+												+ "</td>"
+												+ "<td>"
+												+ data[i].specialty
+												+ "</td>"
+												+ "<td style=\"width:10%\"><a role=\"button\" class=\"btn btn-default btn-sm btn-block\" onclick=\"listPreferTimeEdit('"
+												+ data[i].preferChoice
+												+ "','"
+												+ data[i].preferDate1
+												+ "','"
+												+ data[i].preferDate2
+												+ "')\" data-toggle=\"modal\" href=\"#editApp\" data-todo='{\"appointmentId\":\""
+												+ data[i].keyString
+												+ "\",\"preferDate\":\""
+												+ data[i].preferDate1
+												+ "\",\"doctorId\":\""
+												+ data[i].doctorId
+												+ "\",\"patientId\":\""
+												+ data[i].patientId
+												+ "\",\"status\":\"1\",\"hn\":\""
+												+ data[i].patient.codeHN
+												+ "\",\"name\":\""
+												+ data[i].patient.firstname
+												+ " "
+												+ data[i].patient.lastname
+												+ "\",\"time\":\""
+												+ data[i].preferTime1
+												+ "\",\"preferChoice\":\""
+												+ data[i].preferChoice
+												+ "\",\"preferDate2\":\""
+												+ data[i].preferDate2
+												+ "\",\"time2\":\""
+												+ data[i].preferTime2
+												+ "\"}'>Edit</a></td>"
+												+ "<td style=\"width:10%\"><a class=\"btn bg-red btn-block btn-sm\" href=\"#\" onclick=\"onclickCancelAppointment('"
+												+ data[i].keyString + "','"
+												+ data[i].preferDate1 + "','"
+												+ data[i].doctorId + "','"
+												+ data[i].patientId + "','3','"
+												+ data[i].preferChoice + "','"
+												+ data[i].preferTime1 + "','"
+												+ data[i].preferDate2 + "','"
+												+ data[i].preferTime2
+												+ "')\">Cancel</a></td>";
+									}
+									html += "</tr>";
+								}
+								if (data[i].status == -1) {
+									document.getElementById("addAppButton").disabled = true;
+									document.getElementById("addLeaveButton").disabled = true;
+								}
+							}
+							html += "</tbody>";
+							$('.appointmentTable').html(html);
+							$('#datatable')
+									.DataTable(
+											{
+												dom : '<"pull-right"f>lrt<"pull-left"i><"pull-right"p>',
+												destroy : true
+											});
+							$("#loader").hide();
+						},
+						error : function(data, status, er) {
+							//alert('error');
+							$("#loader").hide();
+						}
+					});
+		}
+
+		function listPreferTime() {
+			var doctorId = readCookie('doctor');
+			var newCurrentDate = $('#makeAppointmnetDate').val().toString();
+			currentPickDate = newCurrentDate;
+			$.ajax({
+				url : "../listAvailableTimeByDoctorIAndDateWS.do?doctorId="
+						+ doctorId + "&selectedDate=" + currentPickDate,
+				type : "GET",
+				dataType : "JSON",
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					var html = '';
+					for (var i = 0; i < data.length; i++) {
+						html += "<option>" + data[i] + "</option>";
+					}
+					$('.listTime').html(html);
+					$("#loader").hide();
+
+					$('#btnSubmitCreateAppointment').prop('disabled', false);
+				},
+				error : function(data, status, er) {
+					//alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+
+		function listPreferTimeEdit(choice, date1, date2) {
+			var doctorId = readCookie('doctor');
+			var newCurrentDate = $('#editAppointmentDate').val().toString();
+			currentPickDate = newCurrentDate;
+			if (choice == "1") {
+				currentPickDate = date1;
+			} else if (choice == "2") {
+				currentPickDate = date2;
+			}
+			$.ajax({
+				url : "../listAvailableTimeByDoctorIAndDateWS.do?doctorId="
+						+ doctorId + "&selectedDate=" + currentPickDate,
+				type : "GET",
+				dataType : "JSON",
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					var html = '';
+					for (var i = 0; i < data.length; i++) {
+						html += "<option>" + data[i] + "</option>";
+					}
+					$('.listTime2').html(html);
+					$("#loader").hide();
+
+					$('#btnSubmitEditAppointment').prop('disabled', false);
+				},
+				error : function(data, status, er) {
+					//alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+
+		function createAppointment() {
+			var patientId = patientSelection;
+			var doctorId = readCookie('doctor');
+			var preferTime = $("#makeAppointmentTime option:selected").text();
+			var preferDate = $("#makeAppointmnetDate").val();
+			if (preferTime != "Choose date first..." && patientSelection != "0") {
+				$("#loader").show();
+				var obj = {
+					initialSymptom : $("#makeAppointmentInitialSymptoms").val(),
+					specialty : readCookie("doctorSpecialty"),
+					preferTime1 : preferTime,
+					preferDate1 : preferDate,
+					status : 1,
+					doctorId : doctorId,
+					patientId : patientId,
+					preferChoice : 1
+
+				};
+				//	alert(JSON.stringify(obj));
+				$.ajax({
+					url : "../makeAppointmentWS.do",
+					type : "POST",
+					dataType : "JSON",
+					data : JSON.stringify(obj),
+					contentType : "application/json",
+					mimeType : "application/json",
+					success : function(data) {
+						//alert('success');
+						//alert(data);
+						if(data == 1){
+							$("#makeAppointmnetDate").val("");
+							$("#makeAppointmentInitialSymptoms").val("");
+							$("#makeAppointmnetDate").val("");
+							$('input[name=patient]').val('');
+							successalert(1);
+						}else if(data == -2){
+							swal("Fail!","The chosen time option is not available, please select other time option.","warning");
+						}else{
+							swal("Fail!","Something went wrong, please try again.","warning");
+						}
+						$("#loader").hide();
+					},
+					error : function(data, status, er) {
+						//alert('error');
+						$("#loader").hide();
+					}
+				});
+			} else {
+				swal("Fail!", "Please fill all fleids", "warning");
+			}
+		}
+
+		function createLeaveDay(start, end) {
+			var doctorId = readCookie('doctor');
+			var preferTime = "08:00 - 16:00";
+			var start1 = null;
+			var startDate = null;
+			var endDate = null;
+			if (start != null) {
+				start1 = start, month = '' + (start1.getMonth() + 1), day = ''
+						+ start1.getDate(), year = start1.getFullYear();
+				if (month.length < 2)
+					month = '0' + month;
+				if (day.length < 2)
+					day = '0' + day;
+				startDate = [ year, month, day ].join('-');
+				endDate = end;
+
+			} else {
+				start1 = new Date($('#startLeaveDate').val()), month = ''
+						+ (start1.getMonth() + 1), day = '' + start1.getDate(),
+						year = start1.getFullYear();
+				if (month.length < 2)
+					month = '0' + month;
+				if (day.length < 2)
+					day = '0' + day;
+
+				startDate = [ year, month, day ].join('-');
+				endDate = $("#endLeaveDate").val();
+			}
+			var count = 1;
+			if (startDate != "NaN-NaN-NaN" || endDate != "") {
+				$("#loader").show();
+				if (startDate <= endDate) {
+					var obj = {
+						preferTime1 : preferTime,
+						preferDate1 : startDate,
+						status : -1,
+						doctorId : doctorId,
+						preferChoice : 1
+					};
+					//alert(JSON.stringify(obj));
+					$.ajax({
+						url : "../makeAppointmentWS.do",
+						type : "POST",
+						dataType : "JSON",
+						data : JSON.stringify(obj),
+						contentType : "application/json",
+						mimeType : "application/json",
+						success : function(data) {
+							var newDate = start1.setDate(start1.getDate() + 1);
+							start1 = new Date(newDate);
+							createLeaveDay(start1, endDate);
+							$("#loader").hide();
+						},
+						error : function(data, status, er) {
+							//alert('error');
+							$("#loader").hide();
+						}
+					});
+				}
+				successalert(count++);
+			} else {
+				swal("Fail!", "Please fill date", "warning");
+			}
+
+		}
+
+		function listPatients() {
+			$("#loader").show();
+			$
+					.ajax({
+						url : "../listPatientWS.do",
+						type : "GET",
+						success : function(data) {
+							var html = '';
+							for (var i = 0; i < data.length; i++) {
+								html += "<option id=\"" +data[i].keyString + "\" value=\""+ data[i].codeHN + " " + data[i].firstname + " " + data[i].lastname + "\"></option>";
+							}
+							$('.listPatient').html(html);
+							$("#loader").hide();
+						},
+						error : function(data, status, er) {
+							//alert('error');
+							$("#loader").hide();
+						}
+					});
+		}
+
+		function removeLeaveday(appointmentId) {
+			$.ajax({
+				url : "../deleteAppointmentWS.do?appointmentId="
+						+ appointmentId,
+				type : "DELETE",
+				dataType : "JSON",
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					//alert('success');
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					//alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+
+		function removeAppointment(appointmentId, preferDate, doctorId,
+				patientId, status, preferChoice, preferTime, preferDate2,
+				preferTime2) {
+			var patientId = patientId;
+			var doctorId = doctorId;
+			$("#loader").show();
+			var obj = {
+				keyString : appointmentId,
+				status : 3,
+				doctorId : doctorId,
+				patientId : patientId,
+				preferChoice : preferChoice,
+				preferDate1 : preferDate,
+				preferTime1 : preferTime,
+				preferDate2 : preferDate2,
+				preferTime2 : preferTime2
+			};
+			//alert(JSON.stringify(obj));
+			$.ajax({
+				url : "../cancelAppointmentWS.do",
+				type : "POST",
+				dataType : "JSON",
+				data : JSON.stringify(obj),
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					//alert('success');
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					//alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+
+		function updateAppointment() {
+			var patientId = $('#patientId').val();
+			var preferTime = $("#editAppointmentTime option:selected").text();
+			var doctorId = $('#doctorId').val();
+			var preferDate1 = '';
+			var preferDate2 = '';
+			var preferTime1 = '';
+			var preferTime2 = '';
+			if ($('#preferChoice').val() == 1) {
+				preferDate1 = $('#editAppointmentDate').val();
+				preferTime1 = $('#editAppointmentTime').val();
+				preferDate2 = $('#preferDate2').val();
+				preferTime2 = $('#preferTime2').val();
+			} else {
+				preferDate2 = $('#editAppointmentDate').val();
+				preferTime2 = $('#editAppointmentTime').val();
+				preferDate1 = $('#preferDate1').val();
+				preferTime1 = $('#preferTime1').val();
+			}
+			$("#loader").show();
+			var obj = {
+				keyString : $('#appointmentId').val(),
+				preferDate1 : preferDate1,
+				preferDate2 : preferDate2,
+				preferTime2 : preferTime2,
+				specialty : readCookie("doctorSpecialty"),
+				preferTime1 : preferTime1,
+				appointmentStatus : $('#status').val(),
+				doctorId : doctorId,
+				patientId : patientId,
+				preferChoice : $('#preferChoice').val()
+			};
+			//alert(JSON.stringify(obj));
+			$.ajax({
+				url : "../saveAppointmentWS.do",
+				type : "POST",
+				dataType : "JSON",
+				data : JSON.stringify(obj),
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					//alert('success');
+					successalert();
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					//alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+
+		function writeCookie(name, value, days) {
+			var date, expires;
+			if (days) {
+				date = new Date();
+				date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+				expires = "; expires=" + date.toGMTString();
+			} else {
+				expires = "";
+			}
+			document.cookie = name + "=" + value + expires + "; path=/";
+
+		}
+		function readCookie(name) {
+			var i, c, ca, nameEQ = name + "=";
+			ca = document.cookie.split(';');
+			for (i = 0; i < ca.length; i++) {
+				c = ca[i];
+				while (c.charAt(0) == ' ') {
+					c = c.substring(1, c.length);
+				}
+				if (c.indexOf(nameEQ) == 0) {
+					return c.substring(nameEQ.length, c.length);
+				}
+			}
+			return '';
+		}
+
+		$('#makeAppointmentPatient').on('input', function() {
+			var opt = $('option[value="' + $(this).val() + '"]');
+			if (opt.length) {
+				patientSelection = opt.attr('id')
+			} else {
+			}
+
+		});
+
+		$('#editApp').on('show.bs.modal', function(e) {
+			var id = $(e.relatedTarget).data('todo').appointmentId;
+			var patient = $(e.relatedTarget).data('todo').patientId;
+			var doctor = $(e.relatedTarget).data('todo').doctorId;
+			var sta = $(e.relatedTarget).data('todo').status;
+			var date = $(e.relatedTarget).data('todo').preferDate;
+			var hospitalnum = $(e.relatedTarget).data('todo').hn;
+			var patientName = $(e.relatedTarget).data('todo').name;
+			var time = $(e.relatedTarget).data('todo').time;
+			var choice = $(e.relatedTarget).data('todo').preferChoice;
+			var date2 = $(e.relatedTarget).data('todo').preferDate2;
+			var time2 = $(e.relatedTarget).data('todo').time2;
+
+			$("#doctorId").val(doctor);
+			$("#hospitalNumber").text(hospitalnum);
+			$("#name").text(patientName);
+			$("#patientId").val(patient);
+			$("#status").val(sta);
+
+			if (choice == 1) {
+				$("#editAppointmentDate").val(date);
+				$("#editAppointmentTime").val(time);
+			} else {
+				$("#editAppointmentDate").val(date2);
+				$("#editAppointmentTime").val(time2);
+			}
+			$("#preferDate1").val(date);
+			$("#preferTime1").val(time);
+			$("#preferDate2").val(date2);
+			$("#preferTime2").val(time2);
+			$("#appointmentId").val(id);
+			$("#preferChoice").val(choice);
+
+		});
+	</script>
+</body>
+</html>

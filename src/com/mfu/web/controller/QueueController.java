@@ -1,0 +1,565 @@
+package com.mfu.web.controller;
+
+import org.joda.time.DateTimeComparator;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.api.client.util.Charsets;
+import com.mfu.dao.appointment.AppointmentDAO;
+import com.mfu.dao.common.UserDAO;
+import com.mfu.dao.queue.QueueEstimatedTimeDAO;
+import com.mfu.dao.queue.QueueMonitorDAO;
+import com.mfu.dao.queue.VisitTransformDAO;
+import com.mfu.dao.record.ClinicDAO;
+import com.mfu.dao.record.PatientDAO;
+import com.mfu.entity.appointment.Appointment;
+import com.mfu.entity.common.User;
+import com.mfu.entity.queue.QueueEstimatedTime;
+import com.mfu.entity.queue.QueueMonitor;
+import com.mfu.entity.queue.Visit;
+import com.mfu.entity.queue.VisitList;
+import com.mfu.entity.queue.VisitRefStage;
+import com.mfu.entity.queue.VisitTransform;
+import com.mfu.entity.record.Clinic;
+import com.mfu.entity.record.Patient;
+import com.mfu.util.PushService;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+
+@Controller
+public class QueueController {
+
+	private static final Logger log = Logger.getLogger(QueueController.class
+			.getName());
+	
+	 public static final Charset UTF_8 = Charset.forName("UTF-8");
+
+	// The controller that responsible for handling all of visit in the hospital
+	// at the time
+	@RequestMapping(value = "/queueWS", method = RequestMethod.POST, consumes = "application/json")
+	@ResponseBody
+	public String ksmQueueData(@RequestBody VisitList visits) {
+
+		try {
+
+			// Keep log when call this service it save current time and the size
+			// of visit
+			// SmartQueueLog(visits);
+			
+			UserDAO userDAO = new UserDAO();
+
+			// Check the patient register on smartqueue application or not
+
+			// Loop of all visit which are coming from hospital
+			log.info("ksmQueueData called size: " + visits.getVisits().size());
+			for (Visit v : visits.getVisits()) {
+				log.info("ksmQueueData VN: " + v.visitNumber);
+				// Determined current stage of each visit
+				int stage = convertVisitToStage(v);
+				log.info("ksmQueueData stage: " + stage);
+
+				// Check duplicate visit in database
+				VisitTransformDAO transformService = new VisitTransformDAO();
+				VisitTransform vtf = transformService
+						.findVisitTransformByVN(v.visitNumber);
+				transformService.closeEntityManager();
+				
+				ClinicDAO clinicDAO = new ClinicDAO();
+				Clinic clinic = clinicDAO.findClinicByClinicCode(v.clinicCode);
+				clinicDAO.closeEntityManager();
+
+				VisitTransformDAO transformService1 = new VisitTransformDAO();
+
+				log.info("ksmQueueData existing?: " + vtf);
+				// If found visit which the same visit number
+				if (vtf != null) {
+
+					// Modify it to the latest data
+					vtf.setVisitDate(v.visitDate);
+					vtf.setHospitalNumber(v.hospitalNumber);
+					vtf.setVisitNumber(v.visitNumber);
+					vtf.setClinicName(v.clinicName);
+					vtf.setClinicCode(v.clinicCode);
+					if (clinic != null)
+						vtf.setClinicMessage(clinic.getMessage());
+					vtf.setDoctorRoom(v.doctorRoom);
+					vtf.setNurseReleaseDateTime(v.nurseReleaseDateTime);
+					vtf.setSendToDiagRmsDateTime(v.sendToDiagRmsDateTime);
+					vtf.setCurrentStage(stage);
+
+					if (stage == VisitTransform.GO_HOME_STAGE) {
+						System.out.println("Is GO_HOME_STAGE "
+								+ vtf.getGoGomeDateTime());
+						if (vtf.getGoGomeDateTime() == null) {
+							System.out
+									.println("Setting date time for GO_HOME_STAGE ");
+							vtf.setGoGomeDateTime(new Date());
+						} else {
+							transformService1.closeEntityManager();
+
+							System.out.println("Checking isQueueExpire");
+							isQueueExpire(vtf.getGoGomeDateTime(),
+									vtf.getKeyString());
+							continue;
+						}
+					}
+
+					// Determined what is the estimate time for this stage
+					int estimatedTime;
+					if (stage == VisitTransform.WAITING_SCREENING_STAGE) {
+						System.out
+								.println("Setting estimated time for WAITING_SCREENING_STAGE");
+						estimatedTime = findEstimatedTimeByStage(VisitTransform.WAITING_SCREENING_STAGE);
+					} else if (stage == VisitTransform.WAITING_VISIT_DOCTOR_STAGE) {
+						System.out
+								.println("Setting estimated time for WAITING_VISIT_DOCTOR_STAGE");
+						estimatedTime = findEstimatedTimeByStage(VisitTransform.WAITING_VISIT_DOCTOR_STAGE);
+					} else {
+						System.out.println("Not in relavent stage");
+						estimatedTime = 0;
+					}
+
+					vtf.setEstimatedTime(estimatedTime);
+
+					vtf.setLastUpdate();
+					
+					transformService1.updateVisitTransform(vtf);
+					log.info("ksmQueueData update VN: " + v.visitNumber);
+					transformService1.closeEntityManager();
+
+					// If not found any visit which the same visit number
+				} else {
+
+					vtf = new VisitTransform();
+
+					vtf.setVisitDate(v.visitDate);
+					vtf.setHospitalNumber(v.hospitalNumber);
+					vtf.setVisitNumber(v.visitNumber);
+					vtf.setClinicName(v.clinicName);
+					vtf.setClinicCode(v.clinicCode);
+					if (clinic != null)
+						vtf.setClinicMessage(clinic.getMessage());
+					vtf.setDoctorRoom(v.doctorRoom);
+					vtf.setSendToDiagRmsDateTime(v.sendToDiagRmsDateTime);
+					vtf.setNurseReleaseDateTime(v.nurseReleaseDateTime);
+					vtf.setCurrentStage(stage);
+
+					if (stage == VisitTransform.GO_HOME_STAGE) {
+						vtf.setGoGomeDateTime(new Date());
+					}
+					VisitTransformDAO transformService2 = new VisitTransformDAO();
+					try {
+						// Determined what is the estimate time for this stage
+						int estimatedTime;
+						if (stage == VisitTransform.WAITING_SCREENING_STAGE) {
+							System.out
+									.println("Setting estimated time for WAITING_SCREENING_STAGE");
+							estimatedTime = findEstimatedTimeByStage(VisitTransform.WAITING_SCREENING_STAGE);
+						} else if (stage == VisitTransform.WAITING_VISIT_DOCTOR_STAGE) {
+							System.out
+									.println("Setting estimated time for WAITING_VISIT_DOCTOR_STAGE");
+							estimatedTime = findEstimatedTimeByStage(VisitTransform.WAITING_VISIT_DOCTOR_STAGE);
+						} else {
+							System.out.println("Not in relavent stage");
+							estimatedTime = 0;
+						}
+
+						vtf.setEstimatedTime(estimatedTime);
+						log.info("ksmQueueData about to update: "
+								+ estimatedTime);
+						vtf.setLastUpdate();
+						log.info("ksmQueueData before saving visit transform ");
+						transformService2.saveVisitTransform(vtf);
+						log.info("ksmQueueData save VN: " + v.visitNumber);
+
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} finally {
+						transformService2.closeEntityManager();
+						log.info("transformService2 closed...");
+					}
+
+					if (vtf.getCurrentStage() == VisitTransform.WAITING_SCREENING_STAGE) {
+						System.out
+								.println("Starting check for auto change status to Visited");
+						checkTheUserIsExits(vtf);
+						System.out
+								.println("Ending check for auto change status to Visited");
+
+					}
+					System.out.println("Saved VisitTransform");
+				}
+
+			}
+
+			// Update queue remaining of all visit which already transform which
+			// relate to WAITING_VISIT_DOCTOR_STAGE
+			updateRemainingQueueInWAITING_VISIT_DOCTOR_STAGE();
+
+			// Return 1 on success
+			return "1";
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			// Return 1 on fail or error
+			return "-1";
+		}
+	}
+
+	/**
+	 * @param vtf
+	 */
+	private void checkTheUserIsExits(VisitTransform vtf) {
+		UserDAO userDAO = new UserDAO();
+		User user = userDAO.findUserByCodeHN(vtf.getHospitalNumber());
+		userDAO.closeEntityManager();
+
+		if (user != null) {
+
+			PatientDAO patientDAO = new PatientDAO();
+			Patient patient = patientDAO.findPatientsByHospitalNumber(vtf
+					.getHospitalNumber());
+			patientDAO.closeEntityManager();
+
+			AppointmentDAO appointmentDAO = new AppointmentDAO();
+			List<Appointment> apList = appointmentDAO
+					.findAppointmentByPatientId(patient.getKeyString());
+			appointmentDAO.closeEntityManager();
+			for (Appointment appointment : apList) {
+				ClinicDAO clinicDAO = new ClinicDAO();
+				Clinic clinic = clinicDAO.findClinicBySpecialty(appointment
+						.getSpecialty());
+				clinicDAO.closeEntityManager();
+				if (isMatchWithAppointmentDay(appointment.getStartDateTime(),
+						vtf.getVisitDate())
+						&& clinic.getClinicCode().equals(vtf.getClinicCode())) {
+					System.out.println("found appointment "
+							+ appointment.getSpecialty() + " "
+							+ appointment.getStartDateTime());
+					AppointmentDAO appointmentDAO2 = new AppointmentDAO();
+					appointment.setStatus(Appointment.STATUS_VISIT);
+					appointmentDAO2.updateAppointment(appointment);
+					appointmentDAO2.closeEntityManager();
+					System.out.println("updated appointment status");
+				} else {
+					System.out
+							.println("The visit dose not macth the appointment");
+				}
+			}
+
+			if (user.getDeviceTokenKey() != null) {
+				sendInitPushNotification(user.getDeviceTokenKey(),
+						vtf.getVisitNumber());
+			}
+		} else {
+			System.out.println("The visiter dose not have smartqueue account");
+		}
+	}
+
+	private boolean isMatchWithAppointmentDay(Date date1, Date date2) {
+		int isTheSameDate = DateTimeComparator.getDateOnlyInstance().compare(
+				date1, date2);
+
+		if (isTheSameDate == 0) {
+			return true;
+		}
+		return false;
+	}
+
+	private void sendInitPushNotification(String deviceTokenKey, String VN) {
+		PushService fcm = new PushService();
+
+		String body = new String("คุณอยู่ในคิวลำดับที่ (VN:)" + VN + ". โปรดรอสักครู่");
+		try {
+
+			fcm.send(deviceTokenKey, body);
+			System.out.println("Send sendInitPushNotification success");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	private void sendMessage(String deviceTokenKey, String msg) {
+		PushService fcm = new PushService();
+
+		String body = msg;
+		try {
+
+			fcm.send(deviceTokenKey, body);
+			System.out.println("Send sendInitPushNotification success");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private void isQueueExpire(Date gohomeDateTime, String visitTransformKey) {
+		Date currentDateTime = new Date();
+		Date goHomeDateTime = gohomeDateTime;
+
+		long duration = currentDateTime.getTime() - goHomeDateTime.getTime();
+		long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
+
+		if (diffInMinutes > 10) {
+			System.out.println("This queue is  expire so deleting "
+					+ diffInMinutes);
+			VisitTransformDAO visitTransformDAO = new VisitTransformDAO();
+			visitTransformDAO.deleteVisitTransform(visitTransformKey);
+			visitTransformDAO.closeEntityManager();
+		} else {
+			System.out.println("This queue is not expire so not delete "
+					+ diffInMinutes);
+		}
+	}
+
+	private void updateRemainingQueueInWAITING_VISIT_DOCTOR_STAGE() {
+		// Determined how many queue remaining until the patient meet the
+		// doctor
+		VisitTransformDAO transformService1 = new VisitTransformDAO();
+		List<VisitTransform> currentPatientInWaitingVisit = transformService1
+				.findVisitTransformByStage(VisitTransform.WAITING_VISIT_DOCTOR_STAGE);
+		transformService1.closeEntityManager();
+
+		// Loop all of visit that already determined stage which stage are
+		// WAITING_VISIT_DOCTOR_STAGE
+		for (VisitTransform visitTransform : currentPatientInWaitingVisit) {
+
+			// Find Remaining Queue
+			int remainingQueue = findRemainingQueue(
+					visitTransform.getHospitalNumber(),
+					visitTransform.getClinicCode(),
+					currentPatientInWaitingVisit);
+
+			VisitTransformDAO transformServiceInLoop = new VisitTransformDAO();
+			VisitTransform vt = transformServiceInLoop
+					.findVisitTransformByKey(visitTransform.getKeyString());
+
+			// Set new remaining queue here
+			vt.setRemainingQueue(remainingQueue);
+
+			// Update the remaining queue in database
+			transformServiceInLoop.updateVisitTransform(vt);
+			transformServiceInLoop.closeEntityManager();
+
+			// FCM
+			// Warning the patient who have queue less than or equal to 5
+			// queue by sending push notification.
+			pushNotification(remainingQueue, visitTransform);
+
+		}
+
+	}
+
+	private int findEstimatedTimeByStage(int stage) {
+		try {
+			java.util.Date date = new java.util.Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+
+			SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+			String dateText = "2017-01-01 " + sdf.format(date).toString();
+
+			Date currentTime = null;
+
+			currentTime = fm.parse(dateText);
+			System.out.println("Current Time After Convert : " + currentTime);
+
+			QueueEstimatedTimeDAO estimatedTimeDAO = new QueueEstimatedTimeDAO();
+			QueueEstimatedTime estimatedTimeForWAITING_VISIT_DOCTOR_STAGE = estimatedTimeDAO
+					.findQueueEstimatedTimeByCurrentTimeANDStage(currentTime,
+							stage);
+			estimatedTimeDAO.closeEntityManager();
+			if (estimatedTimeForWAITING_VISIT_DOCTOR_STAGE != null) {
+				System.out
+						.println("found estimatedTimeForWAITING_VISIT_DOCTOR_STAGE");
+				return estimatedTimeForWAITING_VISIT_DOCTOR_STAGE
+						.getEstimatedTime();
+			} else {
+				System.out
+						.println("not found estimatedTimeForWAITING_VISIT_DOCTOR_STAGE");
+				return 0;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.info(e.getMessage());
+		}
+		return 0;
+	}
+
+	private void SmartQueueLog(VisitList visits) {
+
+		QueueMonitorDAO queueMonitorService = new QueueMonitorDAO();
+		QueueMonitor queueMonitor = new QueueMonitor();
+		queueMonitor.setVisitSize(visits.getVisits().size());
+		queueMonitor.setCallDateTime();
+		queueMonitorService.saveQueueMonitor(queueMonitor);
+		queueMonitorService.closeEntityManager();
+	}
+
+	private int findRemainingQueue(String HN, String clinicCode,
+			List<VisitTransform> currentPatientInWaitingVisit) {
+		// Give starter value equal to 0
+		int remainingQueue = 0;
+
+		// Loop all of visit that already determined stage which stage are
+		// WAITING_VISIT_DOCTOR_STAGE
+		for (VisitTransform visitTransform1 : currentPatientInWaitingVisit) {
+
+			// Compare HN
+			if (visitTransform1.getHospitalNumber().equals(HN)) {
+				break;
+
+				// Count only the same clinic
+			} else if (visitTransform1.getClinicCode().equals(clinicCode)) {
+				remainingQueue++;
+			}
+		}
+
+		return remainingQueue;
+	}
+
+	private void pushNotification(int remainingQueue,
+			VisitTransform visitTransform) {
+		if (remainingQueue <= 5) {
+			System.out.println(visitTransform.getVisitNumber() + " have "
+					+ remainingQueue + " queue remaining");
+
+			UserDAO userDAO = new UserDAO();
+
+			// Check the patient register on smartqueue application or not
+			User user = userDAO.findUserByCodeHN(visitTransform
+					.getHospitalNumber());
+
+			// If found the user
+			if (user != null && user.getDeviceTokenKey() != null) {
+
+				String message = null;
+				if (remainingQueue != 0) {
+					message = new String("คุณเหลืออีก " + remainingQueue + " คิว ก่อนถึงคิวของคุณ");
+				} else {
+					message = "ลำดับคิวคุณอยู่ถัดไป, โปรดรอหน้าห้องตรวจ "+ visitTransform.getDoctorRoom();
+				}
+
+				PushService fcm = new PushService();
+
+				// Call FCM service and give the device token key also a warning
+				// message.
+				boolean isSendNotificationSuccess = false;
+				try {
+					isSendNotificationSuccess = fcm.send(
+							user.getDeviceTokenKey(), message);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				// If FCM have been send the push notification.
+				if (isSendNotificationSuccess) {
+					System.out.println("Send Notification Success");
+				} else {
+					System.out.println("Send Notification Failed");
+				}
+
+			} else {
+				System.out
+						.println("This people does not register on smartqueue application.");
+			}
+
+		}
+
+	}
+	
+	 private  String convertToUTF8(String s) {
+	        String out = null;
+	        try {
+	            out = new String(s.getBytes("UTF-8"), "UTF-8");
+	        } catch (java.io.UnsupportedEncodingException e) {
+	            return null;
+	        }
+	        return out;
+	    }
+
+	public int convertVisitToStage(Visit visit) {
+		int NOT_IN_ANY_STAGE = -1;
+		int stage;
+
+		if ((visit.alreadySettleBalance == VisitRefStage.ALREADY_SETTLE_BALANCE && visit.drugDispense == VisitRefStage.ALREADY_RECEIVED_DRUG)
+				|| (visit.alreadySettleBalance == VisitRefStage.ALREADY_SETTLE_BALANCE && visit.noneedDrugContractPayment == VisitRefStage.NO_NEED_DRUG_CONTACT_PAYMENT)) {
+			stage = VisitTransform.GO_HOME_STAGE;
+		} else if (visit.alreadySettleBalance == VisitRefStage.ALREADY_SETTLE_BALANCE
+				&& visit.drugDispense == VisitRefStage.NOT_READY_RECEIVED_DRUG) {
+			stage = VisitTransform.WAITING_RECEIVE_DRUG_STAGE;
+		} else if (visit.currenStage == VisitRefStage.LEAVED_DOCROR_STAGE
+				&& visit.alreadySettleBalance == VisitRefStage.NOT_READY_SETTLE_BALANCE) {
+			stage = VisitTransform.WAITING_PAYMENT_STAGE;
+		} else if (visit.currenStage == VisitRefStage.VISITING_DCOTOR_STAGE) {
+			stage = VisitTransform.VISITING_DCOTOR_STAGE;
+		} else if (visit.currenStage == VisitRefStage.WAITING_FOR_VISIT_DOCTOR_STAGE) {
+			stage = VisitTransform.WAITING_VISIT_DOCTOR_STAGE;
+		} else if (visit.currenStage == VisitRefStage.SCREENING_NO1_STAGE
+				|| visit.currenStage == VisitRefStage.SCREENING_NO2_STAGE) {
+			stage = VisitTransform.SCREENING_STAGE;
+		} else if (visit.currenStage == VisitRefStage.REGISTER_STAGE) {
+			stage = VisitTransform.WAITING_SCREENING_STAGE;
+		} else {
+			stage = NOT_IN_ANY_STAGE;
+		}
+
+		return stage;
+	}
+
+	@RequestMapping(value = "/findQueueDataByHN", method = RequestMethod.GET)
+	@ResponseBody
+	public VisitTransform findQueueDataByHN(HttpServletRequest request) {
+		VisitTransform queueData = null;
+		VisitTransformDAO dao = new VisitTransformDAO();
+		try {
+			queueData = dao.findVisitTransformByHN(request.getParameter("HN"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dao.closeEntityManager();
+		}
+
+		return queueData;
+	}
+
+	// Delete all visit in database
+	@RequestMapping(value = "/deleteAll", method = RequestMethod.GET)
+	@ResponseBody
+	public String deleteAll(HttpServletRequest request) {
+
+		try {
+			VisitTransformDAO dao1 = new VisitTransformDAO();
+			List<VisitTransform> list = dao1.getAllVisitTransforms();
+			dao1.closeEntityManager();
+
+			for (VisitTransform visitTransform : list) {
+				VisitTransformDAO dao = new VisitTransformDAO();
+				dao.deleteVisitTransform(visitTransform.getKeyString());
+				dao.closeEntityManager();
+			}
+
+			return "1";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "-1";
+		}
+	}
+
+}

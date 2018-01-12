@@ -1,0 +1,76 @@
+package com.mfu.dao.Kmean;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+import com.mfu.entity.Kmean.SymptomTemplate;
+
+
+public class SymptomTemplateDAO {
+	private static final EntityManagerFactory emfInstance = Persistence
+			.createEntityManagerFactory("transactions-optional");
+
+	private EntityManager em = null;
+
+	public SymptomTemplateDAO() {
+		em = emfInstance.createEntityManager();
+	}
+
+	public List<SymptomTemplate> getAllSymptomTemplate() {
+		List<SymptomTemplate> SymptomTemplates = null;
+		try {
+			Query q = em.createQuery("select p from SymptomTemplate p");
+			SymptomTemplates = q.getResultList();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return SymptomTemplates;
+	}
+
+	public SymptomTemplate findSymptomTemplateByKey(String key) {
+		SymptomTemplate SymptomTemplate = null;
+		try {
+			Query q = em.createQuery("select p from SymptomTemplate p where p.key = :key");
+			q.setParameter("key", key);
+			List<SymptomTemplate> SymptomTemplates = q.getResultList();
+			SymptomTemplate = SymptomTemplates.get(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return SymptomTemplate;
+	}
+
+	public void saveSymptomTemplate(SymptomTemplate SymptomTemplate) {
+		try {
+			em.persist(SymptomTemplate);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void updateSymptomTemplate(SymptomTemplate SymptomTemplate) {
+		try {
+			em.merge(SymptomTemplate);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void deleteSymptomTemplate(String key) {
+
+		SymptomTemplate SymptomTemplate = this.findSymptomTemplateByKey(key);
+		if (SymptomTemplate != null)
+			em.remove(SymptomTemplate);
+	}
+
+	public void closeEntityManager() {
+
+		if (em != null)
+			em.close();
+	}
+}

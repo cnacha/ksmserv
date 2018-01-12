@@ -1,0 +1,534 @@
+<%@ page errorPage="../login.do"%>
+<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport">
+<title>Welcome To | Appointment Management</title>
+<!-- Favicon-->
+<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+
+<!-- Google Fonts -->
+<link
+	href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext"
+	rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+	rel="stylesheet" type="text/css">
+
+<!-- Bootstrap Core Css -->
+<link href="../plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+<!-- Animation Css -->
+<link href="../plugins/animate-css/animate.css" rel="stylesheet" />
+
+<!-- Waves Effect Css -->
+<link href="../plugins/node-waves/waves.css" rel="stylesheet" />
+
+<!-- Animation Css -->
+<link href="../plugins/animate-css/animate.css" rel="stylesheet" />
+
+<!-- Wait Me Css -->
+<link href="../plugins/waitme/waitMe.css" rel="stylesheet" />
+
+
+<!-- Sweetalert Css -->
+<link href="../plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+
+<!-- JQuery DataTable Css -->
+<link
+	href="../plugins/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css"
+	rel="stylesheet">
+
+<!-- Custom Css -->
+<link href="../css/style.css" rel="stylesheet">
+
+<!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
+<link href="../css/themes/all-themes.css" rel="stylesheet" />
+</head>
+
+<body class="theme-purple" onload="listUser();">
+	<!-- Page Loader -->
+	<div class="page-loader-wrapper">
+		<div class="loader">
+			<div class="preloader">
+				<div class="spinner-layer pl-purple">
+					<div class="circle-clipper left">
+						<div class="circle"></div>
+					</div>
+					<div class="circle-clipper right">
+						<div class="circle"></div>
+					</div>
+				</div>
+			</div>
+			<p>Please wait...</p>
+		</div>
+	</div>
+	<!-- #END# Page Loader -->
+	<!-- Overlay For Sidebars -->
+	<div class="overlay"></div>
+	<!-- #END# Overlay For Sidebars -->
+	<!-- Top Bar -->
+	<nav class="navbar">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a href="javascript:void(0);" class="navbar-toggle collapsed"
+					data-toggle="collapse" data-target="#navbar-collapse"
+					aria-expanded="false"></a> <a href="javascript:void(0);"
+					class="bars"></a> <a class="navbar-brand"
+					href="../adminhospital.do">KASEMRAD SRIBURIN</a>
+			</div>
+			<div class="collapse navbar-collapse" id="navbar-collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="logout.do"> Log Out</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<!-- #Top Bar -->
+	<section>
+		<!-- Left Sidebar -->
+		<aside id="leftsidebar" class="sidebar">
+			<!-- User Info -->
+			<div class="user-info">
+				<div class="info-container">
+					<div class="name" data-toggle="dropdown" aria-haspopup="true"
+						aria-expanded="false">Administrator Page</div>
+					<div class="btn-group user-helper-dropdown">
+						<i class="material-icons" data-toggle="dropdown"
+							aria-haspopup="true" aria-expanded="true">keyboard_arrow_down</i>
+						<ul class="dropdown-menu pull-right">
+							<li><a href="#editPro" data-toggle="modal"><i
+									class="material-icons">settings</i> Account Settings</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<!-- #User Info -->
+			<!-- Menu -->
+			<div class="menu">
+				<ul class="list">
+					<li class="header">MAIN NAVIGATION</li>
+					<li class="active"><a href="../adminhospital.do"> <i
+							class="material-icons">people</i> <span>Hospital Staff</span>
+					</a></li>
+				</ul>
+			</div>
+			<!-- #Menu -->
+			<!-- Footer -->
+			<div class="legal">
+				<div class="copyright">
+					&copy; 2016 <a href="javascript:void(0);">Appointment
+						management</a>.
+				</div>
+				<div class="version">
+					<b>Version: </b> 1.0
+				</div>
+			</div>
+			<!-- #Footer -->
+		</aside>
+		<!-- #END# Left Sidebar -->
+	</section>
+
+	<section class="content">
+		<div class="container-fluid">
+			<div class="block-header">
+				<h2>HOSPITAL STAFF LIST</h2>
+			</div>
+			<!-- Basic Examples -->
+			<div class="row clearfix">
+				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+					<div class="card">
+						<div class="body">
+							<!-- Nav tabs -->
+							<ul class="nav nav-tabs tab-nav-right tab-col-lime"
+								role="tablist">
+								<li role="presentation" class="active"><a href="#index"
+									data-toggle="tab">Hospital Staffs</a></li>
+							</ul>
+
+							<!-- Tab panes -->
+							<div class="tab-content">
+								<div role="tabpanel" class="tab-pane fade in active" id="index">
+									<button class="btn btn-info pull-right" data-toggle="modal"
+										data-target="#addHos">
+										<i class="material-icons">add</i> New Staff
+									</button>
+									<br /> <br /> <br />
+									<table id="datatable"
+										class="table table-bordered table-striped table-hover userTable">
+										<thead>
+											<tr>
+												<th>Firstname</th>
+												<th>Lastname</th>
+												<th></th>
+												<th></th>
+											</tr>
+										</thead>
+									</table>
+									<div class="clearfix"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- #END# Basic Examples -->
+		</div>
+	</section>
+
+	<form:form id="loginForm" method="post" action="../login.do"
+		modelAttribute="loginBean">
+	</form:form>
+
+	<!-- Modal -->
+	<div id="addHos" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Add Staff</h4>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div style="padding-left: 3%">
+							<div class="input-group">
+								<span class="input-group-addon"> <i
+									class="material-icons">person</i>
+								</span>
+								<div class="form-line">
+									<input type="text" id="username" class="form-control"
+										name="username" placeholder="Username" required autofocus>
+								</div>
+							</div>
+							<div class="input-group">
+								<span class="input-group-addon"> <i
+									class="material-icons">lock</i>
+								</span>
+								<div class="form-line">
+									<input type="password" id="password" class="form-control"
+										name="password" placeholder="Password" required>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="form-line">
+									<input type="text" id="firstname" name="firstname"
+										required="required" class="form-control"
+										placeholder="Firstname" />
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="form-line">
+									<input type="text" id="lastname" name="lastname"
+										required="required" class="form-control"
+										placeholder="Lastname" />
+								</div>
+							</div>
+							<input type="hidden" id="userId" value="0">
+							<div class="clearfix"></div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-link waves-effect"
+						onclick="createUser()" data-dismiss="modal">SUBMIT</button>
+					<button type="button" class="btn btn-link waves-effect"
+						data-dismiss="modal">CLOSE</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<!-- /Modal -->
+
+	<!-- Modal -->
+	<div id="editHos" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Edit Staff</h4>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div style="padding-left: 3%">
+							<div class="input-group">
+								<span class="input-group-addon"> <i
+									class="material-icons">person</i>
+								</span>
+								<div class="form-line">
+									<input type="text" class="form-control" id="userName"
+										name="userName" value="" />
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="form-line">
+									<input type="text" id="firstName" name="firstName"
+										required="required" class="form-control" value="" />
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="form-line">
+									<input type="text" id="lastName" name="lastName"
+										required="required" class="form-control" value="" />
+								</div>
+							</div>
+							<input type="hidden" id="userId" value="0">
+							<div class="clearfix"></div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-link waves-effect"
+						onclick="updateUser()" data-dismiss="modal">SUBMIT</button>
+					<button type="button" class="btn btn-link waves-effect"
+						data-dismiss="modal">CLOSE</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<!-- /Modal -->
+
+	<!-- Jquery Core Js -->
+	<script src="../plugins/jquery/jquery.min.js"></script>
+
+	<!-- Bootstrap Core Js -->
+	<script src="../plugins/bootstrap/js/bootstrap.js"></script>
+
+	<!-- Slimscroll Plugin Js -->
+	<script src="../plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
+
+	<!-- Waves Effect Plugin Js -->
+	<script src="../plugins/node-waves/waves.js"></script>
+
+	<!-- Autosize Plugin Js -->
+	<script src="../plugins/autosize/autosize.js"></script>
+
+	<!-- Moment Plugin Js -->
+	<script src="../plugins/momentjs/moment.js"></script>
+
+	<!-- SweetAlert Plugin Js -->
+	<script src="../plugins/sweetalert/sweetalert.min.js"></script>
+	<script src="../js/pages/ui/dialogs.js"></script>
+
+	<!-- Jquery DataTable Plugin Js -->
+	<script src="../plugins/jquery-datatable/jquery.dataTables.js"></script>
+	<script
+		src="../plugins/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js"></script>
+
+	<!-- Custom Js -->
+	<script src="../js/admin.js"></script>
+	<script src="../js/pages/tables/jquery-datatable.js"></script>
+	
+
+	<!-- Demo Js -->
+	<script src="../js/demo.js"></script>
+
+	<script type="text/javascript">
+		function onclickRemoveButton(userId) {
+			swal({
+				title : "Are you sure?",
+				text : "You will not be able to recover this hospital staff!",
+				type : "warning",
+				showCancelButton : true,
+				confirmButtonColor : "#DD6B55",
+				confirmButtonText : "Yes, delete it!",
+				closeOnConfirm : false,
+				html : false
+			}, function() {
+				removeUser(userId);
+				swal("Deleted!", "This hospital staff has been refused.",
+						"success");
+				setTimeout(function() {
+					listUser(1);
+				}, 4000);
+
+			});
+		}
+
+		function successalert() {
+			swal("Success", "Your request has been done!", "success");
+			setTimeout(function() {
+				listUser(1);
+			}, 4000);
+
+		}
+
+		function listUser(count) {
+			if (count == 1) {
+				$('#datatable').DataTable().destroy();
+			}
+			$("#loader").show();
+			$
+					.ajax({
+						url : "../admin/listHospitalstaffWS.do",
+						type : "GET",
+						success : function(data) {
+							var html = '';
+							html += "<thead>";
+							html += "<tr>";
+							html += "<th>Firstname</th>" + "<th>Lastname</th>"
+									+ "<th></th>" + "<th></th>"
+							html += "</tr>";
+							html += "</thead>";
+							html += "<tbody>";
+							for (var i = 0; i < data.length; i++) {
+								if (data[i].role != 'Admin') {
+									html += "<tr>";
+									html += "<td>"
+											+ data[i].firstname
+											+ "</td>"
+											+ "<td>"
+											+ data[i].lastname
+											+ "</td>"
+											+ "<td style=\"width:9%\"><a class=\"btn btn-default btn-sm btn-block\" href=\"#editHos\" role=\"button\" data-toggle=\"modal\" data-todo='{\"userId\":\"" + data[i].keyString + "\",\"password\":\"" + data[i].password + "\",\"username\":\"" + data[i].username + "\",\"firstname\":\"" + data[i].firstname + "\",\"lastname\":\"" + data[i].lastname + "\"}'>Edit</a> </td>"
+											+ "<td style=\"width:9%\"><a class=\"btn bg-red btn-block btn-sm\" href=\"#\" onclick=\"onclickRemoveButton('"
+											+ data[i].keyString
+											+ "')\">Delete</a> </td>"
+									html += "</tr>";
+								}
+							}
+							html += "</tbody>";
+							$('.userTable').html(html);
+							$('#datatable')
+									.DataTable(
+											{
+												dom : '<"pull-right"f>rt<"pull-left"i><"pull-right"p>',
+												destroy : true
+											});
+							$("#loader").hide();
+						},
+						error : function(data, status, er) {
+							//alert('error');
+							$("#loader").hide();
+						}
+					});
+		}
+
+		function createUser() {
+			if ($.trim($('#username').val()) == '' || $.trim($('#password').val()) == '' || $.trim($('#firstname').val()) == '' || $.trim($('#lastname').val()) == '') {
+				swal("Fail!", "Please fill all field", "warning");
+			} else {
+				$("#loader").show();
+				var obj = {
+					username : $('#username').val(),
+					password : $('#password').val(),
+					firstname : $('#firstname').val(),
+					lastname : $('#lastname').val(),
+					role : 'HospitalStaff'
+				};
+				//alert(JSON.stringify(obj));
+				$.ajax({
+					url : "../admin/saveUserWS.do",
+					type : "POST",
+					dataType : "JSON",
+					data : JSON.stringify(obj),
+					contentType : "application/json",
+					mimeType : "application/json",
+					success : function(data) {
+						$('#username').val(""), $('#password').val(""), $(
+								'#firstname').val(""), $('#lastname').val(""),
+								successalert();
+						//alert('success');
+						$("#loader").hide();
+					},
+					error : function(data, status, er) {
+						//alert('error');
+						$("#loader").hide();
+					}
+				});
+			}
+
+		}
+
+		function updateUser() {
+			if ($.trim($('#userId').val()) == '' || $.trim($('#userName').val()) == '' || $.trim($('#firstName').val()) == ''
+				|| $.trim($('#lastName').val()) == '') {
+				swal("Fail!", "Please fill all field", "warning");
+			} else {
+				$("#loader").show();
+				var obj = {
+					keyString : $('#userId').val(),
+					username : $('#userName').val(),
+					password : $('#passWord').val(),
+					firstname : $('#firstName').val(),
+					lastname : $('#lastName').val(),
+					role : 'HospitalStaff'
+
+				};
+				//alert(JSON.stringify(obj));
+				$.ajax({
+					url : "../admin/updateUserWS.do?userId="
+							+ $('#userId').val() + "&firstname="
+							+ $('#firstName').val() + "&lastname="
+							+ $('#lastName').val() + "&password="
+							+ $('#passWord').val()
+							+ "&role=HospitalStaff&username="
+							+ $('#userName').val(),
+					type : "POST",
+					dataType : "JSON",
+					contentType : "application/json",
+					mimeType : "application/json",
+					success : function(data) {
+						successalert();
+						$("#loader").hide();
+					},
+					error : function(data, status, er) {
+						//alert('error');
+						$("#loader").hide();
+					}
+				});
+			}
+		}
+
+		function removeUser(userId) {
+			$("#loader").show();
+			//alert(JSON.stringify(obj));
+			$.ajax({
+				url : "../admin/deleteUserWS.do?userId=" + userId,
+				type : "DELETE",
+				dataType : "JSON",
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					//alert('success');
+					listUser();
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					//alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+
+		$('#editHos').on('show.bs.modal', function(e) {
+			var id = $(e.relatedTarget).data('todo').userId;
+			var password = $(e.relatedTarget).data('todo').password;
+			var username = $(e.relatedTarget).data('todo').username;
+			var firstname = $(e.relatedTarget).data('todo').firstname;
+			var lastname = $(e.relatedTarget).data('todo').lastname;
+
+			$("#userId").val(id);
+			$("#passWord").val(password);
+			$("#userName").val(username);
+			$("#firstName").val(firstname);
+			$("#lastName").val(lastname);
+
+		});
+	</script>
+</body>
+
+</html>

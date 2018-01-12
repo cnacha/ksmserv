@@ -1,0 +1,86 @@
+package com.mfu.entity.survey;
+
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+
+@Entity 
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Question {
+	
+	public static String TYPE_CHOICE = "CHOICE";
+	public static String TYPE_OPEN = "OPEN";
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Key key;
+	private String questionString;
+	private long orderNo;
+	private String type;
+	
+	private String formKey;
+/*
+	@OneToMany(mappedBy="question", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private List<Choice> answerChoices;
+*/	
+	@Transient
+	private List<Choice> answerChoices;
+	
+	public Key getKey() {
+		return key;
+	}
+	public void setKey(Key key) {
+		this.key = key;
+	}
+	public String getQuestionString() {
+		return questionString;
+	}
+	public void setQuestionString(String questionString) {
+		this.questionString = questionString;
+	}
+	public long getOrderNo() {
+		return orderNo;
+	}
+	public void setOrderNo(long orderNo) {
+		this.orderNo = orderNo;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	
+	public String getKeyString() {
+		return KeyFactory.keyToString(key);
+	}
+
+	public void setKeyString(String keyString) {
+		key = KeyFactory.stringToKey(keyString);
+	}
+	public String getFormKey() {
+		return formKey;
+	}
+	public void setFormKey(String formKey) {
+		this.formKey = formKey;
+	}
+	public List<Choice> getAnswerChoices() {
+		return answerChoices;
+	}
+	public void setAnswerChoices(List<Choice> answerChoices) {
+		this.answerChoices = answerChoices;
+	}
+	
+}

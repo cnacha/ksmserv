@@ -1,0 +1,368 @@
+package com.mfu.web.controller;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.mfu.dao.Kmean.SymptomDAO;
+import com.mfu.dao.survey.FormDAO;
+import com.mfu.entity.Kmean.Symptom;
+import com.mfu.entity.survey.Question;
+import com.mfu.entity.survey.SurveyForm;
+
+
+
+@Controller
+public class PageLinkController {
+	
+	private SecurityManager securityManager;
+	private ModelAndView loginPage;
+	
+	@PostConstruct
+	protected void init() {
+		securityManager = new SecurityManager();
+		loginPage = SecurityController.getLoginPage();
+	}
+
+
+	@RequestMapping(value = "/dashboard", method = RequestMethod.GET)
+	public ModelAndView displayDashboard(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("dashboard.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+
+	@RequestMapping(value = "/appointment", method = RequestMethod.GET)
+	public ModelAndView displayAppointment(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/appointment/appointment.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+
+	@RequestMapping(value = "/doctor", method = RequestMethod.GET)
+	public ModelAndView displayDoctor(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/doctor.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	@RequestMapping(value = "/queue", method = RequestMethod.GET)
+	public ModelAndView displayQueue(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/queue.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+
+	@RequestMapping(value = "/survey", method = RequestMethod.GET)
+	public ModelAndView displayForm(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/surveyform/form.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	@RequestMapping(value = "/Impact", method = RequestMethod.GET)
+	public ModelAndView displayImpact(HttpServletRequest request, HttpServletResponse response) {
+
+			ModelAndView model = null;
+			if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+				request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+				model = new ModelAndView("pages/Impact.jsp");
+				String key = request.getParameter("key");
+				model.addObject("symtomID",key);
+				
+				SymptomDAO dao = new SymptomDAO();
+				Symptom q = dao.findSyntomByKey(key);
+				if(q!=null){
+					model.addObject("symptomname", q.getSymptomName());
+				}
+			} else {
+				model = getLoginPage();
+			}
+
+			return model;
+	}
+	
+	@RequestMapping(value = "/question", method = RequestMethod.GET)
+	public ModelAndView displayQuestion(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/surveyform/question.jsp");
+			String formkey = request.getParameter("formkey");
+			model.addObject("formkey",formkey);
+			FormDAO dao = new FormDAO();
+			SurveyForm f = dao.findFormByKey(formkey);
+			if(f!=null)
+				model.addObject("formname", f.getName());
+			dao.closeEntityManager();
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	@RequestMapping(value = "/choice", method = RequestMethod.GET)
+	public ModelAndView displayChoice(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/surveyform/choice.jsp");
+			String key = request.getParameter("qkey");
+			model.addObject("questionKey",key);
+			
+			FormDAO dao = new FormDAO();
+			Question q = dao.findQuestionByKey(key);
+			if(q!=null){
+				model.addObject("questionString", q.getQuestionString());
+				model.addObject("formKey",q.getFormKey());
+			}
+			dao.closeEntityManager();
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	@RequestMapping(value = "/clinic", method = RequestMethod.GET)
+	public ModelAndView displayClinic(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/clinic.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+
+	@RequestMapping(value = "/patient", method = RequestMethod.GET)
+	public ModelAndView displayPatient(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/patient.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	@RequestMapping(value = "/vitalsign", method = RequestMethod.GET)
+	public ModelAndView displayVitalsign(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("vitalsign.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+
+	@RequestMapping(value = "/report", method = RequestMethod.GET)
+	public ModelAndView displayReport(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/report.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	@RequestMapping(value = "/appointmentpending", method = RequestMethod.GET)
+	public ModelAndView displayAppointmentpending(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/appointment/appointment-pending.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	@RequestMapping(value = "/appointmentapprove", method = RequestMethod.GET)
+	public ModelAndView displayAppointmentapprove(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/appointment/appointment-approve.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+
+	
+	@RequestMapping(value = "/appointmenttable", method = RequestMethod.GET)
+	public ModelAndView displayAppointmenttable(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/doctor-table.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	public ModelAndView getLoginPage(){
+		return this.loginPage;
+	}
+	
+	@RequestMapping(value = "/adminhospital", method = RequestMethod.GET)
+	public ModelAndView displayAdminhospital(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_ADMIN)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/admin-hospital.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	@RequestMapping(value = "/Symptom", method = RequestMethod.GET)
+	public ModelAndView displaySymptom(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/InputSymptom.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	
+	@RequestMapping(value = "/voucher", method = RequestMethod.GET)
+	public ModelAndView displayVoucher(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/voucher.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	@RequestMapping(value = "/ScanQRCode", method = RequestMethod.GET)
+	public ModelAndView displayScanQRCode(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/ScanQRCode.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	@RequestMapping(value = "/News", method = RequestMethod.GET)
+	public ModelAndView displayNews(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/News.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	@RequestMapping(value = "/Promotion", method = RequestMethod.GET)
+	public ModelAndView displayPromotion(HttpServletRequest request, HttpServletResponse response) {
+
+		ModelAndView model = null;
+		if (securityManager.validateAuthority(request, SecurityManager.ROLE_HOSPITALSTAFF)) {
+			request.setAttribute("adminData", request.getSession().getAttribute("adminData"));
+			model = new ModelAndView("pages/Promotion.jsp");
+		} else {
+			model = getLoginPage();
+		}
+
+		return model;
+	}
+	
+	
+	/*
+	private boolean accessPagePermission(HttpServletRequest request, HttpServletResponse response) {
+		if (request.getSession().getAttribute("loggedInUser") != null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+*/
+
+}

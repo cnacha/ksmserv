@@ -1,0 +1,327 @@
+<%@ page errorPage="../login.do"%>
+<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport">
+<title>Welcome To | Appointment Management</title>
+<!-- Favicon-->
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+
+<!-- Google Fonts -->
+<link
+	href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext"
+	rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+	rel="stylesheet" type="text/css">
+
+<!-- Bootstrap Core Css -->
+<link href="../plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+<!-- Waves Effect Css -->
+<link href="../plugins/node-waves/waves.css" rel="stylesheet" />
+
+<!-- Animation Css -->
+<link href="../plugins/animate-css/animate.css" rel="stylesheet" />
+
+<!-- Wait Me Css -->
+<link href="../plugins/waitme/waitMe.css" rel="stylesheet" />
+
+<!-- Bootstrap Select Css -->
+<link href="../plugins/bootstrap-select/css/bootstrap-select.css"
+	rel="stylesheet" />
+
+<!-- Custom Css -->
+<link href="../css/style.css" rel="stylesheet">
+
+<!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
+<link href="../css/themes/all-themes.css" rel="stylesheet" />
+
+<style>
+tfoot input {
+	width: 100%;
+	padding: 3px;
+	box-sizing: border-box;
+}
+</style>
+
+</head>
+
+<body class="theme-purple" onload="listAllAppointment();">
+	<!-- Page Loader -->
+	<div class="page-loader-wrapper">
+		<div class="loader">
+			<div class="preloader">
+				<div class="spinner-layer pl-purple">
+					<div class="circle-clipper left">
+						<div class="circle"></div>
+					</div>
+					<div class="circle-clipper right">
+						<div class="circle"></div>
+					</div>
+				</div>
+			</div>
+			<p>Please wait...</p>
+		</div>
+	</div>
+	<!-- #END# Page Loader -->
+	<!-- Overlay For Sidebars -->
+	<div class="overlay"></div>
+	<!-- #END# Overlay For Sidebars -->
+	<%@ include file="./sidebar.jsp"%>
+
+	<section class="content">
+		<div class="container-fluid">
+			<div class="block-header">
+				<h2>REPORT</h2>
+			</div>
+			<!-- Basic Examples -->
+			<div class="row clearfix">
+				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+					<div class="card">
+						<div class="body">
+							<!-- Nav tabs -->
+							<ul class="nav nav-tabs tab-nav-right tab-col-lime"
+								role="tablist">
+								<li role="presentation" class="active"><a href="#index"
+									data-toggle="tab">Appointment Report</a></li>
+							</ul>
+
+							<br /> <br />
+
+							<table id="example"
+								class="table table-bordered table-striped table-hover">
+								<thead>
+									<tr>
+										<th>Start time</th>
+										<th>End time</th>
+										<th>Patient's HN</th>
+										<th>Patient's Name</th>
+										<th>Requested Doctor</th>
+										<th>Status</th>
+									</tr>
+								</thead>
+								<tfoot>
+									<tr>
+										<th>Start time</th>
+										<th>End time</th>
+										<th>Patient's HN</th>
+										<th>Patient's Name</th>
+										<th>Requested Doctor</th>
+										<th>Status</th>
+									</tr>
+								</tfoot>
+								<tbody>
+									<tr>
+										<td> ASD </td>
+										<td> Z </td>
+										<td> ASD</td>
+										<td> ASD</td>
+										<td> ASD</td>
+										<td> ASD</td>
+									</tr>
+									<tr>
+										<td> ASD </td>
+										<td> ASD </td>
+										<td> ASD</td>
+										<td> ASD</td>
+										<td> ASD</td>
+										<td> ASD</td>
+									</tr>
+									<tr>
+										<td> ASD </td>
+										<td> ASD </td>
+										<td> ASD</td>
+										<td> ASD</td>
+										<td> ASD</td>
+										<td> ASD</td>
+									</tr>
+									<tr>
+										<td> ASD </td>
+										<td> ASD </td>
+										<td> ASD</td>
+										<td> ASD</td>
+										<td> ASD</td>
+										<td> ASD</td>
+									</tr>
+								</tbody>
+							
+							</table>
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+			<!-- #END# Basic Examples -->
+		</div>
+	</section>
+
+	<%@include file="../settings.jsp"%>
+	<form:form id="loginForm" method="post" action="../login.do"
+		modelAttribute="loginBean">
+	</form:form>
+
+
+
+	<script src="../../js/jquery.js" type="text/javascript"></script>
+	<script src="../../js/jquery.dataTables.min.js" type="text/javascript"></script>
+	
+	<script>
+	
+		
+		
+		function listAllAppointment() {
+			$("#loader").show();
+			$
+					.ajax({
+						url : "../listAllAppointmentWS.do",
+						type : "GET",
+						success : function(data) {
+
+							var html = '';
+							html += "<thead>";
+								html += "<tr>";
+									html += "<th>Start time</th>";
+									html += "<th>End time</th>";
+									html += "<th>Patient's HN</th>";
+									html += "<th>Patient's Name</th>";
+									html += "<th>Requested Doctor</th>";
+									html += "<th>Status</th>";
+								html += "</tr>";
+							html += "</thead>";
+
+							html += "<tfoot>";
+								html += "<tr>";
+									html += "<th><input type=\"text\" placeholder=\"Search By Start time\" /></th>";
+									html += "<th><input type=\"text\" placeholder=\"Search By End time\" /></th>";
+									html += "<th><input type=\"text\" placeholder=\"Search By Patient's HN\" /></th>";
+									html += "<th><input type=\"text\" placeholder=\"Search By Patient's Name\" /></th>";
+									html += "<th><input type=\"text\" placeholder=\"Search By Requested Doctor\" /></th>";
+									html += "<th><input type=\"text\" placeholder=\"Search By Status\" /></th>";
+								html += "</tr>";
+							html += "</tfoot>";
+							
+							html += "<tbody>";
+							
+							for (var i = 0; i < data.length; i++) {
+								html += "<tr>";
+								html += "<td>" + data[i].startDateTime
+										+ "</td>";
+								html += "<td>" + data[i].endDateTime + "</td>";
+								html += "<td>" + data[i].patient.codeHN
+										+ "</td>";
+								html += "<td>" + data[i].patient.firstname
+										+ " " + data[i].patient.lastname
+										+ "</td>";
+								html += "<td>" + data[i].doctor.firstname + " "
+										+ data[i].doctor.lastname + "</td>";
+								if (data[i].status == 0) {
+									html += "<td> Pedding </td>";
+								} else if (data[i].status == 1) {
+									html += "<td> Approved </td>";
+								} else if (data[i].status == 2) {
+									html += "<td> Rejected </td>";
+								} else if (data[i].status == 3) {
+									html += "<td> Cancelled </td>";
+								} else if (data[i].status == 4) {
+									html += "<td> Cancelled </td>";
+								} else {
+									html += "<td> Cancelled </td>";
+								}
+
+								html += "</tr>";
+
+							}
+
+							html += "</tbody>";
+
+
+						
+							$('#example').html(html);
+							// Setup - add a text input to each footer cell
+							
+							var table = $('#example').DataTable({
+								dom : 'Bfrtip',
+								buttons : [ 'copy', 'csv', 'excel', 'pdf', 'print' ]
+							});
+							
+							 // Apply the search
+			                table.columns().every( function () {
+			                    var that = this;
+			            
+			                    $( 'input', this.footer() ).on( 'keyup change', function () {
+			                        if ( that.search() !== this.value ) {
+			                            that
+			                                .search( this.value )
+			                                .draw();
+			                        }
+			                    } );
+			                } );
+							
+							$("#loader").hide();
+						
+						},
+						error : function(data, status, er) {
+							//alert('error');
+							$("#loader").hide();
+						}
+					});
+			
+			
+		}
+	</script>
+
+	
+
+	<!-- Jquery Core Js -->
+	<script src="../../plugins/jquery/jquery.min.js"></script>
+
+	<!-- Bootstrap Core Js -->
+	<script src="../../plugins/bootstrap/js/bootstrap.js"></script>
+
+	<!-- Select Plugin Js -->
+	<script src="../../plugins/bootstrap-select/js/bootstrap-select.js"></script>
+
+	<!-- Slimscroll Plugin Js -->
+	<script src="../../plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
+
+	<!-- Waves Effect Plugin Js -->
+	<script src="../../plugins/node-waves/waves.js"></script>
+
+	<!-- Jquery DataTable Plugin Js -->
+	<script src="../../plugins/jquery-datatable/jquery.dataTables.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/dataTables.buttons.min.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/buttons.flash.min.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/jszip.min.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/pdfmake.min.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/vfs_fonts.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/buttons.html5.min.js"></script>
+	<script
+		src="../../plugins/jquery-datatable/extensions/export/buttons.print.min.js"></script>
+
+	<!-- Custom Js -->
+	<script src="../../js/admin.js"></script>
+	<script src="../../js/pages/tables/jquery-datatable.js"></script>
+
+	<!-- Demo Js -->
+	<script src="../../js/demo.js"></script>
+	
+	
+</body>
+
+</html>
+
+

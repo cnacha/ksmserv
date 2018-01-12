@@ -1,0 +1,504 @@
+package com.mfu.web.controller;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.mfu.dao.appointment.AppointmentDAO;
+import com.mfu.dao.record.DoctorDAO;
+import com.mfu.dao.record.PatientDAO;
+import com.mfu.entity.appointment.Appointment;
+import com.mfu.entity.record.Doctor;
+import com.mfu.entity.record.Patient;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@Controller
+public class AppointmentController {
+
+	@RequestMapping(value = "/listAllAppointmentWS", method = RequestMethod.GET)
+	public @ResponseBody List<Appointment> listAllAppointmentWS(HttpServletRequest request) {
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		List<Appointment> appointments = appointmentService.getAllAppointment();
+		appointmentService.closeEntityManager();
+
+		return appointments;
+	}
+
+	@RequestMapping(value = "/findAppointmentByDateAndStatusWS", method = RequestMethod.GET)
+	public @ResponseBody List<Appointment> findAppointmentByDateAndStatusWS(HttpServletRequest request) {
+
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		String status = request.getParameter("status");
+		System.out.println("status = "+status);
+
+		// Convert String to Date
+		DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+		List<Appointment> appointments = null;
+		
+		try {
+			Date sDate = format.parse(startDate);
+			Date eDate = format.parse(endDate);
+
+			AppointmentDAO appointmentService = new AppointmentDAO();
+			if (status.equals("-1")) {
+				appointments = appointmentService.findAppointmentByDateAndStatus(sDate, eDate);
+			} else {
+				appointments = appointmentService.findAppointmentByDateAndStatus(sDate, eDate, Integer.parseInt(status));
+			}
+
+			System.out.println("Appointment report size = " + appointments.size());
+			appointmentService.closeEntityManager();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return appointments;
+	}
+
+	@RequestMapping(value = "/listAppointmentByDoctorAndDateIdWS", method = RequestMethod.GET)
+	public @ResponseBody List<Appointment> listAppointmentByDoctorAndDateIdWS(HttpServletRequest request) {
+		System.out.println(request.getParameter("doctorId") + " " + request.getParameter("date"));
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+
+		List<Appointment> datas = new ArrayList<Appointment>();
+
+		List<Appointment> appointments = appointmentService.findAppointmentByDoctorId(request.getParameter("doctorId"));
+
+		String date = request.getParameter("date");
+
+		for (Appointment appointment : appointments) {
+
+			String preferDate = "";
+			if (appointment.getPreferChoice() == 1) {
+				preferDate = appointment.getPreferDate1();
+			} else {
+				preferDate = appointment.getPreferDate2();
+			}
+			System.out.println(preferDate + " == " + date);
+			if (preferDate.equals(date) && (appointment.getStatus() == 1 || appointment.getStatus() == -1)) {
+
+				datas.add(appointment);
+			}
+		}
+
+		appointmentService.closeEntityManager();
+
+		return datas;
+	}
+
+	@RequestMapping(value = "/listPendingAppointmentWS", method = RequestMethod.GET)
+	public @ResponseBody List<Appointment> listPendingAppointmentWS(HttpServletRequest request) {
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		List<Appointment> appointments = appointmentService.findAppointmentByStatus(Appointment.STATUS_PENDING);
+		appointmentService.closeEntityManager();
+
+		return appointments;
+	}
+
+	@RequestMapping(value = "/listVisitedAppointmentWS", method = RequestMethod.GET)
+	public @ResponseBody List<Appointment> listVisitedAppointmentWS(HttpServletRequest request) {
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		List<Appointment> appointments = appointmentService.findAppointmentByStatus(Appointment.STATUS_VISIT);
+		appointmentService.closeEntityManager();
+
+		return appointments;
+	}
+	
+	@RequestMapping(value = "/listConfirmAppointmentWS", method = RequestMethod.GET)
+	public @ResponseBody List<Appointment> listConfirmAppointmentWS(HttpServletRequest request) {
+		
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		List<Appointment> appointments = appointmentService.findAppointmentByStatus(Appointment.STATUS_CONFIRM);
+		appointmentService.closeEntityManager();
+
+		return appointments;
+	}
+	
+	@RequestMapping(value = "/listApproveAppointmentWS", method = RequestMethod.GET)
+	public @ResponseBody List<Appointment> listApproveAppointmentWS(HttpServletRequest request) {
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		List<Appointment> appointments = appointmentService.findAppointmentByStatus(Appointment.STATUS_APPROVE);
+		appointmentService.closeEntityManager();
+
+		return appointments;
+	}
+
+	@RequestMapping(value = "/listCancelAppointmentWS", method = RequestMethod.GET)
+	public @ResponseBody List<Appointment> listCancelAppointmentWS(HttpServletRequest request) {
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		List<Appointment> appointments = appointmentService.findAppointmentByStatus(Appointment.STATUS_CANCEL);
+		appointmentService.closeEntityManager();
+
+		return appointments;
+	}
+
+	@RequestMapping(value = "/listAppointmentByDoctorIdWS", method = RequestMethod.GET)
+	public @ResponseBody List<Appointment> listAppointmentByDoctorIdWS(HttpServletRequest request) {
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		List<Appointment> appointments = appointmentService.findAppointmentByDoctorId(request.getParameter("doctorId"));
+
+		appointmentService.closeEntityManager();
+
+		return appointments;
+	}
+
+	@RequestMapping(value = "/findAppointmentByPatientWS", method = RequestMethod.GET)
+	public @ResponseBody List<Appointment> listAppointmentByPatientIdWS(HttpServletRequest request) {
+
+		List<Appointment> appointments = null;
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		PatientDAO pservice = new PatientDAO();
+		Patient p = pservice.findPatientsByHospitalNumber(request.getParameter("codeHN"));
+		if (request.getParameter("fromDate") != null) {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			try {
+				Date fromDate = formatter.parse(request.getParameter("fromDate"));
+
+				appointments = appointmentService.findAppointmentByFromDate(p.getKeyString(), fromDate);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} else if (request.getParameter("status") != null) {
+			int status = Integer.parseInt(request.getParameter("status"));
+			appointments = appointmentService.findAppointmentByStatus(p.getKeyString(), status);
+		} else {
+			appointments = appointmentService.findAppointmentByPatientId(p.getKeyString());
+		}
+
+		appointmentService.closeEntityManager();
+
+		return appointments;
+	}
+
+	@RequestMapping(value = "/makeAppointmentWS", method = RequestMethod.POST)
+	public @ResponseBody String makeAppointmentWS(@RequestBody Appointment appointment, HttpServletRequest request) {
+		System.out.println(
+				"makeAppointmentWS called " + " " + appointment.getPreferChoice() + " " + appointment.getStatus());
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		try {
+			if (appointment.getStatus() == 1 || appointment.getStatus() == -1) {
+				appointment.fetchStartEndDateTime();
+			}
+			if (appointment.getCodeHN() != null && appointment.getPatientId() == null) {
+				PatientDAO pservice = new PatientDAO();
+				Patient p = pservice.findPatientsByHospitalNumber(appointment.getCodeHN());
+				appointment.setPatientId(p.getKeyString());
+				pservice.closeEntityManager();
+			}
+			if (appointment.getDoctorId() == null) {
+				// assign doctor by speciality
+				DoctorDAO dservice = new DoctorDAO();
+				List<Doctor> doctors = dservice.findDoctorBySpecialty(appointment.getSpecialty());
+				dservice.closeEntityManager();
+				// find available doctor by purposed time choices
+				for (Doctor doctor : doctors) {
+					appointment.setPreferChoice(1);
+					appointment.fetchStartEndDateTime();
+					List<Appointment> result = appointmentService.findAppointmentByDoctorAndTime(doctor.getKeyString(),
+							appointment.getStartDateTime(), appointment.getEndDateTime());
+					// System.out.println(" 1 found "+result.size()+"
+					// appointment of "+doctor.getKeyString());
+					if (result == null || result.size() == 0) {
+						appointment.setDoctorId(doctor.getKeyString());
+						break;
+					} else {
+						appointment.setPreferChoice(2);
+						appointment.fetchStartEndDateTime();
+						result = appointmentService.findAppointmentByDoctorAndTime(doctor.getKeyString(),
+								appointment.getStartDateTime(), appointment.getEndDateTime());
+						// System.out.println(" 2 found "+result.size()+"
+						// appointment of "+doctor.getKeyString());
+						if (result == null || result.size() == 0) {
+							appointment.setDoctorId(doctor.getKeyString());
+							break;
+						}
+					}
+				}
+				if (appointment.getDoctorId() == null)
+					return "-2";
+			}
+
+			appointmentService.insertAppointment(appointment);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return "-1";
+		} finally {
+			appointmentService.closeEntityManager();
+		}
+
+		return "1";
+	}
+
+	@RequestMapping(value = "/saveAppointmentWS", method = RequestMethod.POST)
+	public @ResponseBody String saveAppointmentWS(@RequestBody Appointment appointment, HttpServletRequest request) {
+		System.out.println("saveAppointmentWS called " + appointment.getKeyString() + " "
+				+ appointment.getPreferChoice() + " " + appointment.getStatus());
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		try {
+			if (appointment.getStatus() == 1) {
+				appointment.fetchStartEndDateTime();
+				// check available time/date
+				if (!appointmentService.checkAppointmentValid(appointment))
+					return "-1";
+
+			}
+
+			appointmentService.updateAppointment(appointment);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return "-1";
+		} finally {
+			appointmentService.closeEntityManager();
+		}
+
+		return "1";
+	}
+
+	@RequestMapping(value = "/cancelAppointmentWS", method = RequestMethod.POST)
+	public @ResponseBody String cancelAppointmentWS(@RequestBody Appointment appointment, HttpServletRequest request) {
+		System.out.println(
+				"cancelAppointmentWS called " + " " + appointment.getPreferChoice() + " " + appointment.getStatus());
+
+		try {
+
+			AppointmentDAO appointmentService = new AppointmentDAO();
+			Appointment a = appointmentService.findAppointmentByKey(appointment.getKeyString());
+			a.setStatus(Appointment.STATUS_CANCEL);
+			appointmentService.updateAppointment(a);
+			appointmentService.closeEntityManager();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return "-1";
+		}
+
+		return "1";
+	}
+
+	@RequestMapping(value = "/confirmAppointmentWS", method = RequestMethod.POST)
+	public @ResponseBody String confirmAppointmentWS(@RequestBody Appointment appointment, HttpServletRequest request) {
+		System.out.println(
+				"confirmAppointmentWS called " + " " + appointment.getPreferChoice() + " " + appointment.getStatus());
+
+		try {
+
+			AppointmentDAO appointmentService = new AppointmentDAO();
+			Appointment a = appointmentService.findAppointmentByKey(appointment.getKeyString());
+			a.setStatus(Appointment.STATUS_CONFIRM);
+			appointmentService.updateAppointment(a);
+			appointmentService.closeEntityManager();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return "-1";
+		}
+
+		return "1";
+	}
+
+	@RequestMapping(value = "/findAppointmentWS", method = RequestMethod.GET)
+	public @ResponseBody Appointment findAppointmentWS(HttpServletRequest request) {
+		System.out.println("... passing key " + request.getParameter("appointmentId"));
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		Appointment appointment = appointmentService.findAppointmentByKey(request.getParameter("appointmentId"));
+		appointmentService.closeEntityManager();
+
+		return appointment;
+	}
+
+	@RequestMapping(value = "/deleteAppointmentWS", method = RequestMethod.DELETE)
+	public @ResponseBody String removeAppointment(HttpServletRequest request) {
+
+		try {
+			AppointmentDAO appointmentService = new AppointmentDAO();
+
+			appointmentService.deleteAppointment(request.getParameter("appointmentId"));
+			appointmentService.closeEntityManager();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "-1";
+		}
+		return "1";
+
+	}
+
+	@RequestMapping(value = "/updateAppointmentWS", method = RequestMethod.POST)
+	public @ResponseBody String updateAppointmentWS(HttpServletRequest request) {
+
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		try {
+
+			int appointmentStatus = Integer.parseInt(request.getParameter("appointmentStatus"));
+
+			Appointment appointment = appointmentService.findAppointmentByKey(request.getParameter("appointmentId"));
+			System.out.println(appointment.getPreferChoice());
+			if (appointment.getPreferChoice() == 1) {
+				if (request.getParameter("preferDate1") != null) {
+					appointment.setPreferDate1(request.getParameter("preferDate1"));
+					appointment.setPreferTime1(request.getParameter("preferTime1"));
+				}
+			} else {
+				if (request.getParameter("preferDate2") != null) {
+					appointment.setPreferDate1(request.getParameter("preferDate2"));
+					appointment.setPreferTime1(request.getParameter("preferTime2"));
+				}
+			}
+
+			appointment.setStatus(appointmentStatus);
+
+			appointmentService.insertAppointment(appointment);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "-1";
+		}
+
+		appointmentService.closeEntityManager();
+
+		return "1";
+	}
+
+	@RequestMapping(value = "/resetAppointment", method = RequestMethod.GET)
+	public @ResponseBody String resetAppointment(HttpServletRequest request) {
+		String key = request.getParameter("key");
+		int status = Integer.parseInt(request.getParameter("status"));
+		AppointmentDAO appointmentService = new AppointmentDAO();
+		Appointment ap = appointmentService.findAppointmentByKey(key);
+		ap.setStatus(status);
+		appointmentService.updateAppointment(ap);
+		appointmentService.closeEntityManager();
+		return "1";
+
+	}
+
+	@RequestMapping(value = "/appointmentPendingTester", method = RequestMethod.GET)
+	public @ResponseBody String appointmentTester(HttpServletRequest request) {
+
+		try {
+
+			Appointment appointment = new Appointment();
+			appointment.setStatus(Appointment.STATUS_PENDING);
+			appointment.setDoctorId("ag5rc21zZXJ2LTE1NDcyM3ITCxIGRG9jdG9yGICAgICAgIQJDA");
+			appointment.setPatientId("ag5rc21zZXJ2LTE1NDcyM3IUCxIHUGF0aWVudBiAgICAgICkCAw");
+			appointment.setInitialSymptom("Sick");
+			appointment.setPreferChoice(1);
+			appointment.setPreferDate1("2016-12-24");
+			appointment.setPreferTime1("11:00 - 11:30");
+			appointment.setPreferDate2("2016-12-24");
+			appointment.setPreferTime2("11:30 - 12:00");
+			appointment.setSpecialty("Dental");
+
+			AppointmentDAO appointmentService = new AppointmentDAO();
+			appointmentService.insertAppointment(appointment);
+			appointmentService.closeEntityManager();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return "-1";
+		}
+
+		return "1";
+	}
+
+	@RequestMapping(value = "/appointmentTester1", method = RequestMethod.GET)
+	public @ResponseBody String appointmentTester1(HttpServletRequest request) {
+
+		// if (request.getSession().getAttribute("loggedInUser") == null) {
+		// return "invalid request";
+		// }
+		PatientDAO patientDAO = new PatientDAO();
+		try {
+
+			Appointment appointment = new Appointment();
+			appointment.setStatus(0);
+
+			appointment.setInitialSymptom("Sick");
+			appointment.setPreferChoice(1);
+			appointment.setPreferDate1("2016-12-24");
+			appointment.setPreferTime1("11:00 - 11:30");
+			appointment.setPreferDate2("2016-12-24");
+			appointment.setPreferTime2("11:30 - 12:00");
+			appointment.setSpecialty("Dental");
+			appointment.setDoctorId("aglub19hcHBfaWRyEwsSBkRvY3RvchiAgICAgICACQw");
+			appointment.setPatientId("aglub19hcHBfaWRyFAsSB1BhdGllbnQYgICAgICAoAsM");
+
+			AppointmentDAO appointmentService = new AppointmentDAO();
+			appointment = appointmentService.insertAppointment(appointment);
+			appointmentService.closeEntityManager();
+			patientDAO.closeEntityManager();
+
+			// appointmentService = new AppointmentDAO();
+			// appointmentService.updateAppointment(appointment);
+			// appointmentService.closeEntityManager();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return "-1";
+		}
+
+		return "1";
+	}
+
+	@RequestMapping(value = "/appointmentTester3", method = RequestMethod.GET)
+	public @ResponseBody String appointmentTester3() {
+		try {
+
+			Appointment appointment = new Appointment();
+			appointment.setStatus(3);
+			appointment.setDoctorId("ag5rc21zZXJ2LTE1NDcyM3ITCxIGRG9jdG9yGICAgICAgIQJDA");
+			appointment.setPatientId("ag5rc21zZXJ2LTE1NDcyM3IUCxIHUGF0aWVudBiAgICAgIDECQw");
+			appointment.setInitialSymptom("Sick");
+			appointment.setPreferChoice(0);
+			appointment.setPreferDate1("2017-01-24");
+			appointment.setPreferTime1("11:00 - 11:30");
+			appointment.setPreferDate2("2017-01-24");
+			appointment.setPreferTime2("11:30 - 12:00");
+			appointment.setSpecialty("Dental");
+			appointment.setStatus(0);
+
+			AppointmentDAO appointmentService = new AppointmentDAO();
+			appointmentService.insertAppointment(appointment);
+			appointmentService.closeEntityManager();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return "-1";
+		}
+
+		return "1";
+	}
+
+}

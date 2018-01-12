@@ -1,0 +1,306 @@
+<%@ page errorPage="../login.do"%>
+<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport">
+<title>Welcome To | Appointment Management</title>
+<!-- Favicon-->
+<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+
+<!-- Google Fonts -->
+<link
+	href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext"
+	rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+	rel="stylesheet" type="text/css">
+
+<!-- Bootstrap Core Css -->
+<link href="../../plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+<!-- Waves Effect Css -->
+<link href="../../plugins/node-waves/waves.css" rel="stylesheet" />
+
+<!-- Animation Css -->
+<link href="../../plugins/animate-css/animate.css" rel="stylesheet" />
+
+
+<!-- Custom Css -->
+<link href="../../css/style.css" rel="stylesheet">
+
+<!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
+<link href="../../css/themes/all-themes.css" rel="stylesheet" />
+</head>
+
+<body class="theme-purple"
+	onload="listApproveAppointments();listPendingAppointments();">
+	<!-- Page Loader -->
+	<div class="page-loader-wrapper">
+		<div class="loader">
+			<div class="preloader">
+				<div class="spinner-layer pl-purple">
+					<div class="circle-clipper left">
+						<div class="circle"></div>
+					</div>
+					<div class="circle-clipper right">
+						<div class="circle"></div>
+					</div>
+				</div>
+			</div>
+			<p>Please wait...</p>
+		</div>
+	</div>
+	<!-- #END# Page Loader -->
+	<!-- Overlay For Sidebars -->
+	<div class="overlay"></div>
+	<!-- #END# Overlay For Sidebars -->
+	<%@ include file="../sidebar.jsp" %>
+
+	<section class="content">
+		<div class="container-fluid">
+			<div class="block-header">
+				<h2>APPOINTMENTS</h2>
+			</div>
+			<!-- Basic Examples -->
+			<div class="row clearfix">
+				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+					<div class="card">
+						<div class="body">
+							<!-- Nav tabs -->
+							<ul class="nav nav-tabs tab-nav-right tab-col-lime"
+								role="tablist">
+								<li role="presentation" class="active"><a href="#pending"
+									data-toggle="tab">Pending</a></li>
+								<li role="presentation"><a href="#approve"
+									data-toggle="tab">Approve</a></li>
+							</ul>
+
+							<!-- Tab panes -->
+							<div class="tab-content">
+								<div role="tabpanel" class="tab-pane fade in active"
+									id="pending">
+									<b>Pending List</b><br /> <br />
+									<table id="datatable_pending"
+										class="table table table-bordered table-striped table-hover pendingTable">
+										<thead>
+											<tr>
+
+												<th>Patient Name</th>
+												<th>Specialty</th>
+												<th>Doctor request</th>
+												<th>Preferred date</th>
+												<th>Time</th>
+												<th>Status</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+								<div role="tabpanel" class="tab-pane fade" id="approve">
+									<b>Approve List</b><br /> <br />
+									<table id="datatable_approve"
+										class="table ttable table-bordered table-striped table-hover approveTable">
+										<thead>
+											<tr>
+
+												<th>Patient Name</th>
+												<th>Specialty</th>
+												<th>Doctor request</th>
+												<th>Preferred date</th>
+												<th>Time</th>
+												<th>Status</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- #END# Basic Examples -->
+		</div>
+	</section>
+
+	<%@include file="../../settings.jsp"%>
+	<form:form id="loginForm" method="post" action="../login.do"
+		modelAttribute="loginBean">
+	</form:form>
+
+	<!-- Jquery Core Js -->
+	<script src="../../plugins/jquery/jquery.min.js"></script>
+
+	<!-- Bootstrap Core Js -->
+	<script src="../../plugins/bootstrap/js/bootstrap.js"></script>
+
+	<!-- Select Plugin Js -->
+	<script src="../../plugins/bootstrap-select/js/bootstrap-select.js"></script>
+
+	<!-- Slimscroll Plugin Js -->
+	<script src="../../plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
+
+	<!-- Waves Effect Plugin Js -->
+	<script src="../../plugins/node-waves/waves.js"></script>
+
+	<!-- Jquery DataTable Plugin Js -->
+	<script src="../../js/datatables.net/js/jquery.dataTables.min.js"></script>
+	<script src="../../js/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+	<!-- Custom Js -->
+	<script src="../../js/admin.js"></script>
+	<script src="../../js/pages/tables/jquery-datatable.js"></script>
+
+	<!-- Demo Js -->
+	<script src="../../js/demo.js"></script>
+
+	<script type="text/javascript">
+		function writeCookie(name, value, days) {
+			var date, expires;
+			if (days) {
+				date = new Date();
+				date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+				expires = "; expires=" + date.toGMTString();
+			} else {
+				expires = "";
+			}
+			document.cookie = name + "=" + value + expires + "; path=/";
+
+		}
+
+		function approvePage(appointmentId) {
+			writeCookie("appointment", appointmentId, 1);
+			window.location.href = "../appointmentapprove.do";
+		}
+
+		function waitingPage(appointmentId) {
+			writeCookie("appointment", appointmentId, 1);
+			window.location.href = "../appointmentpending.do";
+		}
+
+		function listApproveAppointments() {
+			$("#loader").show();
+			$
+					.ajax({
+						url : "../listApproveAppointmentWS.do",
+						type : "GET",
+						success : function(data) {
+							var html = '';
+							html += "<thead>";
+							html += "<tr>";
+							html += "<th>Patient Name</th>"
+									+ "<th>Specialty</th>"
+									+ "<th>Doctor request</th>"
+									+ "<th>Preferred date</th>"
+									+ "<th>Time</th>" + "<th>Status</th>"
+							html += "</tr>";
+							html += "</thead>";
+							html += "<tbody>";
+							if(data.length == 0){
+								html += "<tr><td colspan='99'>No Approved Appointment</td></tr>";
+							}
+							for (var i = 0; i < data.length; i++) {
+								html += "<tr onclick=\"approvePage('"
+										+ data[i].keyString + "')\">";
+
+								html += "<td>" + data[i].patient.firstname + " "
+										+ data[i].patient.lastname + "</td>"
+										+ "<td>" + data[i].doctor.specialty + "</td>";
+
+								if (data[i].doctorId != null) {
+									html += "<td>" + data[i].doctor.firstname
+											+ " " + data[i].doctor.lastname
+											+ "</td>";
+								} else {
+									html += "<td> Any doctors </td>";
+
+								}
+
+								if (data[i].preferChoice == 1) {
+									html += "<td>" + data[i].preferDate1
+											+ "</td>" + "<td>"
+											+ data[i].preferTime1 + "</td>";
+								} else {
+									html += "<td>" + data[i].preferDate2
+											+ "</td>" + "<td>"
+											+ data[i].preferTime2 + "</td>";
+								}
+
+								html += "<td style=\"width:9%\"><a class=\"btn bg-lime btn-sm btn-block\">Approve</a></td>"
+										+ "</tr>";
+							}
+							html += "</tbody>";
+							$('.approveTable').html(html);
+							$('#datatable_approve').dataTable();
+							$("#loader").hide();
+						},
+						error : function(data, status, er) {
+							//alert('error');
+							$("#loader").hide();
+						}
+					});
+		}
+
+		function listPendingAppointments() {
+			$("#loader").show();
+			$
+					.ajax({
+						url : "../listPendingAppointmentWS.do",
+						type : "GET",
+						success : function(data) {
+							var html = '';
+							html += "<thead>";
+							html += "<tr>";
+							html += "<th>Patient Name</th>"
+									+ "<th>Specialty</th>"
+									+ "<th>Doctor request</th>"
+									+ "<th>Preferred date</th>"
+									+ "<th>Time</th>" + "<th>Status</th>"
+							html += "</tr>";
+							html += "</thead>";
+							html += "<tbody>";
+							if(data.length == 0){
+								html += "<tr><td colspan='99'>No Pending Appointment</td></tr>";
+							}
+							for (var i = 0; i < data.length; i++) {
+								html += "<tr onclick=\"waitingPage('"
+										+ data[i].keyString + "')\">";
+
+								html += "<td>" + data[i].patient.firstname + " "
+										+ data[i].patient.lastname + "</td>"
+										+ "<td>" + data[i].doctor.specialty + "</td>";
+
+								if (data[i].doctorId != null) {
+									html += "<td>" + data[i].doctor.firstname
+											+ " " + data[i].doctor.lastname
+											+ "</td>";
+								} else {
+									html += "<td> Any doctors </td>";
+
+								}
+								html += "<td>"
+										+ data[i].preferDate1
+										+ "</td>"
+										+ "<td>"
+										+ data[i].preferTime1
+										+ "</td>"
+										+ "<td style=\"width:9%\"> <a class=\"btn bg-red btn-sm btn-block\">Pending</a></td>";
+								html += "</tr>";
+							}
+							html += "</tbody>";
+							$('.pendingTable').html(html);
+							$('#datatable_pending').dataTable();
+							$("#loader").hide();
+						},
+						error : function(data, status, er) {
+							//alert('error');
+							$("#loader").hide();
+						}
+					});
+		}
+	</script>
+</body>
+
+</html>

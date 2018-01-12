@@ -1,0 +1,254 @@
+package com.mfu.dao.common;
+
+import java.util.List;
+import java.util.logging.Logger;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+
+import com.mfu.entity.common.User;
+import com.mfu.util.SecurityUtil;
+import com.mfu.web.controller.SecurityManager;
+
+public class UserDAO {
+	
+	private final static Logger logger = Logger.getLogger(UserDAO.class .getName());  
+
+	private static final EntityManagerFactory emfInstance = Persistence
+			.createEntityManagerFactory("transactions-optional");
+
+	private EntityManager em = null;
+
+	public UserDAO() {
+		em = emfInstance.createEntityManager();
+	}
+
+	public List<User> getAllUser() {
+
+		List<User> users = null;
+
+		try {
+			Query q = em.createQuery("select p from User p");
+			users = q.getResultList();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return users;
+
+	}
+
+	public User findUserByKey(String key) {
+
+		User user = null;
+
+		try {
+			Query q = em.createQuery("select u from User u where u.key = :key");
+
+			q.setParameter("key", key);
+			user = (User) q.getSingleResult();
+
+		} catch (NoResultException e) {
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return user;
+
+	}
+	
+	public User findUserByCodeHN(String codeHN) {
+
+		User user = null;
+
+		try {
+			Query q = em.createQuery("select u from User u where u.codeHN = :codeHN");
+
+			q.setParameter("codeHN", codeHN);
+			user = (User) q.getSingleResult();
+
+		} catch (NoResultException e) {
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return user;
+
+	}
+
+	public List<User> findUserByRole(String role) {
+
+		List<User> users = null;
+
+		try {
+			Query q = em.createQuery("select u from User u where u.role = :role");
+
+			q.setParameter("role", role);
+			users = q.getResultList();
+
+		} catch (NoResultException e) {
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return users;
+
+	}
+
+	public User findUserByAuthorizationKey(String authorizationKey) {
+
+		User user = null;
+
+		try {
+			Query q = em.createQuery("select u from User u where u.authorizationKey = :authorizationKey");
+
+			q.setParameter("authorizationKey", authorizationKey);
+			user = (User) q.getSingleResult();
+
+		} catch (NoResultException e) {
+			logger.info("no result for authorization key");
+		} catch (Exception e) {
+			logger.warning("Error occur while querying authorization key");
+		}
+		return user;
+
+	}
+
+	public void saveUser(User user) {
+
+		try {
+			SecurityUtil securityService = new SecurityUtil();
+
+			System.out.println(
+					"save user " + user.getPassword() + "==" + securityService.passwordToMD5(user.getPassword()));
+			if (user.getKey() == null) {
+				String passwordMD5 = securityService.passwordToMD5(user.getPassword());
+				user.setPassword(passwordMD5);
+			}
+
+			em.persist(user);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void updateUser(User user) {
+
+		try {
+			
+			em.merge(user);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void deleteUser(String key) {
+
+		User user = this.findUserByKey(key);
+		if (user != null)
+			em.remove(user);
+	}
+
+	public void closeEntityManager() {
+
+		if (em != null)
+
+			em.close();
+
+	}
+
+	public boolean checkDuplicateUsername(String username) {
+
+		boolean isDupicate = false;
+		try {
+			Query q = em.createQuery("select p from User p where p.username = :username");
+
+			q.setParameter("username", username);
+
+			if (q.getResultList().size() != 0)
+				isDupicate = true;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return isDupicate;
+
+	}
+
+	public User authenticate(String username, String password) {
+
+		User user = null;
+		if (username != null && password != null) {
+			SecurityUtil securityService = new SecurityUtil();
+			System.out.println(password);
+			password = securityService.passwordToMD5(password);
+
+			System.out.println("user"+username+" password: "+password);
+
+			try {
+				Query q = em.createQuery(
+						"select p from User p where p.username = :username and p.password = :password and p.status=1");
+
+				q.setParameter("username", username);
+				q.setParameter("password", password);
+
+				if (q.getResultList().size() != 0)
+					user = (User) q.getResultList().get(0);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		return user;
+	}
+
+	public List<User> listActivateUsers() {
+		List<User> users = null;
+		try {
+			Query q = em.createQuery("select p from User p where p.status = 1");
+			users = q.getResultList();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return users;
+	}
+
+	public List<User> listDeactivateUsers() {
+		List<User> users = null;
+		try {
+			Query q = em.createQuery("select p from User p where p.status = 0");
+			users = q.getResultList();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return users;
+	}
+
+	public List<User> listMobileUser() {
+		List<User> users = null;
+		try {
+			Query q = em.createQuery("select p from User p where p.role = 'Patient' AND p.status = 1");
+			users = q.getResultList();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return users;
+	}
+}

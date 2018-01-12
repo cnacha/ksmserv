@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMART QUEUE</title>
+
+<!-- Bootstrap -->
+<link rel="stylesheet" href="css/bootstrap.css">
+
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body
+	onload="initPatientAInfomation();initPatientBInfomation();initPatientCInfomation();">
+	<!-- HEADER -->
+	<header> </header>
+	<!-- / HEADER -->
+
+	<!--  SECTION-1 -->
+	<section>
+		<div class="row">
+			<div class="col-lg-12 page-header text-center">
+				<h2>SMART QUEUE SIMULATION</h2>
+			</div>
+		</div>
+		<div class="container ">
+			<div class="row">
+				<div class="col-lg-12 page-header">
+					<h2>Stages Desciption</h2>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;"
+						src="images/stage-waiting.png" data-holder-rendered="true">
+					<h4>WAITING_VISIT_DOCTOR_STAGE</h4>
+					<p>เมื่อผู้ป่วย กำลังรอพบแพทย์ต่อไป</p>
+				</div>
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;"
+						src="images/stage-screening.png" data-holder-rendered="true">
+					<h4>SCREENING_STAGE</h4>
+					<p>เมื่อผู้ป่วยกำลัง เข้ารับการตรวจเบื่องต้น</p>
+				</div>
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;"
+						src="images/stage-waiting.png" data-holder-rendered="true">
+					<h4>WAITING_VISIT_DOCTOR_STAGE</h4>
+					<p>เมื่อผู้ป่วย กำลังรอพบแพทย์ต่อไป</p>
+				</div>
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;" src="images/stage-visit.png"
+						data-holder-rendered="true">
+					<h4>VISITING_DCOTOR_STAGE</h4>
+					<p>เมื่อผู้ป่วยกำลัง พบแพทย์</p>
+				</div>
+				<div class="col-lg-4 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;"
+						src="images/stage-payment.png" data-holder-rendered="true">
+					<h4>WAITING_PAYMENT_STAGE</h4>
+					<p>เมื่อผู้ป่วย สิ้นสุดการพบแพทย์แล้ว
+						และกำลังรอจ่ายค่ารักษาพยาบาล</p>
+				</div>
+				<div class="col-lg-4 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;" src="images/stage-drug.png"
+						data-holder-rendered="true">
+					<h4>WAITING_RECEIVE_DRUG_STAGE</h4>
+					<p>เมื่อผู้ป่วยจ่ายค่ารักษาพยาบาลเรียบร้อย และ มียาทีต้องรับ
+						&nbsp; &nbsp; &nbsp;(รอรับยา)</p>
+				</div>
+				<div class="col-lg-4 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;" src="images/stage-home.png"
+						data-holder-rendered="true">
+					<h4>GO_HOME_STAGE</h4>
+					<p>เมื่อรับยาเรียบร้อยแล้ว</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 page-header">
+					<h2>Situation 1 : Normal Visit</h2>
+				</div>
+			</div>
+			<div class="row ">
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;"
+						src="images/stage-waiting.png" data-holder-rendered="true">
+					<h4>WAITING_SCREENING_STAGE</h4>
+					<p>เมื่อผู้ป่วย เข้ามาลงทะเบียนเข้ารักษา</p>
+				</div>
+				<div class="col-lg-8 col-sm-12 text-center">
+					<a class="btn btn-block btn-lg btn-success" onClick="stage1('A');"
+						title="">นาย A ลงทะเบียนเรียบร้อยแล้ว</a> <a
+						class="btn btn-block btn-lg btn-warning" onClick="stage1('B');"
+						title="">นาย B ลงทะเบียนเรียบร้อยแล้ว</a> <a
+						class="btn btn-block btn-lg btn-danger" onClick="stage1('C');"
+						title="">นาย C ลงทะเบียนเรียบร้อยแล้ว</a>
+				</div>
+			</div>
+			<div class="row ">
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;"
+						src="images/stage-screening.png" data-holder-rendered="true">
+					<h4>SCREENING_STAGE</h4>
+					<p>เมื่อผู้ป่วยกำลัง เข้ารับการตรวจเบื่องต้น</p>
+				</div>
+				<div class="col-lg-8 col-sm-12 text-center">
+					<a class="btn btn-block btn-lg btn-success" onClick="stage2('A');"
+						title="">นาย A กำลังเข้ารับการตรวจเบื่องต้น </a> <a
+						class="btn btn-block btn-lg btn-warning" onClick="stage2('B');"
+						title="">นาย B กำลังเข้ารับการตรวจเบื่องต้น</a> <a
+						class="btn btn-block btn-lg btn-danger" onClick="stage2('C');"
+						title="">นาย C กำลังเข้ารับการตรวจเบื่องต้น</a>
+				</div>
+			</div>
+			<div class="row ">
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;"
+						src="images/stage-waiting.png" data-holder-rendered="true">
+					<h4>WAITING_VISIT_DOCTOR_STAGE</h4>
+					<p>เมื่อผู้ป่วย กำลังรอพบแพทย์ต่อไป</p>
+				</div>
+				<div class="col-lg-8 col-sm-12 text-center">
+					<a class="btn btn-block btn-lg btn-success" onClick="stage3('A');"
+						title="">นาย A กำลังรอพบแพทย์ </a> <a
+						class="btn btn-block btn-lg btn-warning" onClick="stage3('B');"
+						title="">นาย B กำลังรอพบแพทย์ </a> <a
+						class="btn btn-block btn-lg btn-danger" onClick="stage3('C');"
+						title="">นาย C กำลังรอพบแพทย์ </a>
+				</div>
+			</div>
+			<div class="row ">
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;" src="images/stage-visit.png"
+						data-holder-rendered="true">
+					<h4>VISITING_DCOTOR_STAGE</h4>
+					<p>เมื่อผู้ป่วย กำลังพบแพทย์</p>
+				</div>
+				<div class="col-lg-8 col-sm-12 text-center">
+					<a class="btn btn-block btn-lg btn-success" onClick="stage4('A');"
+						title="">นาย A กำลังพบแพทย์ </a> <a
+						class="btn btn-block btn-lg btn-warning" onClick="stage4('B');"
+						title="">นาย B กำลังพบแพทย์ </a> <a
+						class="btn btn-block btn-lg btn-danger" onClick="stage4('C');"
+						title="">นาย C กำลังพบแพทย์ </a>
+				</div>
+			</div>
+			<div class="row ">
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;"
+						src="images/stage-payment.png" data-holder-rendered="true">
+					<h4>WAITING_PAYMENT_STAGE</h4>
+					<p>เมื่อผู้ป่วย สิ้นสุดการพบแพทย์แล้ว
+						และกำลังรอจ่ายค่ารักษาพยาบาล</p>
+				</div>
+				<div class="col-lg-8 col-sm-12 text-center">
+					<a class="btn btn-block btn-lg btn-success" onClick="stage5('A');"
+						title="">นาย A กำลังรอจ่ายค่ารักษาพยาบาล </a> <a
+						class="btn btn-block btn-lg btn-warning" onClick="stage5('B');"
+						title="">นาย B กำลังรอจ่ายค่ารักษาพยาบาล </a> <a
+						class="btn btn-block btn-lg btn-danger" onClick="stage5('C');"
+						title="">นาย C กำลังรอจ่ายค่ารักษาพยาบาล </a>
+				</div>
+			</div>
+			<div class="row ">
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;" src="images/stage-drug.png"
+						data-holder-rendered="true">
+					<h4>WAITING_RECEIVE_DRUG_STAGE</h4>
+					<p>เมื่อผู้ป่วยจ่ายค่ารักษาพยาบาลเรียบร้อย และ มียาทีต้องรับ
+						&nbsp; &nbsp; &nbsp;(รอรับยา)</p>
+				</div>
+				<div class="col-lg-8 col-sm-12 text-center">
+					<a class="btn btn-block btn-lg btn-success" onClick="stage6('A');"
+						title="">นาย A กำลังรอรับยา </a> <a
+						class="btn btn-block btn-lg btn-warning" onClick="stage6('B');"
+						title="">นาย B กำลังรอรับยา </a> <a
+						class="btn btn-block btn-lg btn-danger" onClick="stage6('C');"
+						title="">นาย C กำลังรอรับยา </a>
+				</div>
+			</div>
+			<div class="row ">
+				<div class="col-lg-3 col-sm-12 text-center">
+					<img class="img-circle" alt="140x140"
+						style="width: 140px; height: 140px;" src="images/stage-home.png"
+						data-holder-rendered="true">
+					<h4>GO_HOME_STAGE</h4>
+					<p>เมื่อรับยาเรียบร้อยแล้ว</p>
+				</div>
+				<div class="col-lg-8 col-sm-12 text-center">
+					<a class="btn btn-block btn-lg btn-success" onClick="stage7('A');"
+						title="">นาย A รับยาเรียบร้อยแล้ว </a> <a
+						class="btn btn-block btn-lg btn-warning" onClick="stage7('B');"
+						title="">นาย B รับยาเรียบร้อยแล้ว </a> <a
+						class="btn btn-block btn-lg btn-danger" onClick="stage7('C');"
+						title="">นาย C รับยาเรียบร้อยแล้ว </a>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-lg-12 page-header text-center">
+					<h2>Patient Information</h2>
+				</div>
+			</div>
+			<div class="row" id="patientInfo">
+				<div class="col-lg-4 col-sm-12 bg-success">
+					<h4>นาย A</h4>
+					<p>HN : 129896</p>
+					<p>VN : 1</p>
+					<p>
+						CurrenStage : <span id="currenStage_A">N/A</span>
+					</p>
+					<p>
+						RemainingQueue : <span id="remainingQueue_A">N/A</span>
+					</p>
+					<p>
+						EstimatedTime : <span id="estimatedTime_A">N/A</span>
+					</p>
+					<p>
+						SendToDiagRmsDateTime : <span id="sendToDiagRmsDateTime_A">N/A</span>
+					</p>
+				</div>
+				<div class="col-lg-4 col-sm-12 bg-warning">
+					<h4>นาย B</h4>
+					<p>HN : 129897</p>
+					<p>VN : 2</p>
+					<p>
+						CurrenStage : <span id="currenStage_B">N/A</span>
+					</p>
+					<p>
+						RemainingQueue : <span id="remainingQueue_B">N/A</span>
+					</p>
+					<p>
+						EstimatedTime : <span id="estimatedTime_B">N/A</span>
+					</p>
+					<p>
+						SendToDiagRmsDateTime : <span id="sendToDiagRmsDateTime_B">N/A</span>
+					</p>
+				</div>
+				<div class="col-lg-4 col-sm-12 bg-danger">
+					<h4>นาย C</h4>
+					<p>HN : 129898</p>
+					<p>VN : 3</p>
+					<p>
+						CurrenStage : <span id="currenStage_C">N/A</span>
+					</p>
+					<p>
+						RemainingQueue : <span id="remainingQueue_C">N/A</span>
+					</p>
+					<p>
+						EstimatedTime : <span id="estimatedTime_C">N/A</span>
+					</p>
+					<p>
+						SendToDiagRmsDateTime : <span id="sendToDiagRmsDateTime_C">N/A</span>
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<hr>
+
+
+	<footer class="text-center">
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-12">
+					<p>Copyright © SmartQueue. All rights reserved.</p>
+				</div>
+			</div>
+		</div>
+	</footer>
+	<!-- / FOOTER -->
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	<script src="js/jquery-1.11.3.min.js"></script>
+	<!-- Include all compiled plugins (below), or include individual files as needed -->
+	<script src="js/bootstrap.js"></script>
+
+	<script type="text/javascript">
+	
+		function getCurrentDate() {
+			var today = new Date();
+			var dd = today.getDate();
+			var mm = today.getMonth() + 1; //January is 0!
+
+			var yyyy = today.getFullYear();
+			if (dd < 10) {
+				dd = '0' + dd;
+			}
+			if (mm < 10) {
+				mm = '0' + mm;
+			}
+			var todayDate = dd + '/' + mm + '/' + yyyy;
+			return todayDate;
+		}
+		
+		function getCurrentTime() {
+			var today = new Date();
+			
+			var hh = today.getHours(); 
+			var mm = today.getMinutes(); 
+
+			var todayTime = hh+':'+mm;
+			return todayTime;
+		}
+			
+		function stage1(patient) {
+			
+			var visits = [];
+
+			if (patient == 'A') {
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "1",
+					"HN" : "129896",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : null,
+					"SendToDiagRmsDateTime" : null,
+					"CurrenStage" : 0,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+
+			} else if (patient == 'B') {
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "2",
+					"HN" : "129897",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : null,
+					"SendToDiagRmsDateTime" : null,
+					"CurrenStage" : 0,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			} else if (patient == 'C') {
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "3",
+					"HN" : "129898",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : null,
+					"SendToDiagRmsDateTime" : null,
+					"CurrenStage" : 0,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			}
+
+			visits = JSON.stringify({
+
+				'visits' : visits
+
+			});
+
+			console.log('Patient : ' + patient
+					+ ' change his stage to WAITING_SCREENING_STAGE : '
+					+ visits);
+
+			$("#loader").show();
+			$.ajax({
+				url : "../smartqueue.do",
+				type : "POST",
+				dataType : "JSON",
+				data : visits,
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					console.log('Change stage success');
+					
+					setTimeout(function() {
+						initPatientAInfomation();
+						initPatientBInfomation();
+						initPatientCInfomation();
+						window.location.href = '#patientInfo';
+					}, 4000);
+				
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+
+		function stage2(patient) {
+
+			var visits = [];
+
+			if (patient == 'A') {
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "1",
+					"HN" : "129896",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : null,
+					"CurrenStage" : 14,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+
+			} else if (patient == 'B') {
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "2",
+					"HN" : "129897",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : null,
+					"CurrenStage" : 14,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			} else if (patient == 'C') {
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "3",
+					"HN" : "129898",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : null,
+					"CurrenStage" : 14,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			}
+
+			visits = JSON.stringify({
+
+				'visits' : visits
+
+			});
+
+			console.log('Patient : ' + patient
+					+ ' change his stage to SCREENING_STAGE : ' + visits);
+
+			$("#loader").show();
+			$.ajax({
+				url : "../smartqueue.do",
+				type : "POST",
+				dataType : "JSON",
+				data : visits,
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					console.log('Change stage success');
+					setTimeout(function() {
+						initPatientAInfomation();
+						initPatientBInfomation();
+						initPatientCInfomation();
+						window.location.href = '#patientInfo';
+					}, 4000);
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+		
+		var SendToDiagRmsDateTime_A = '';
+		var SendToDiagRmsDateTime_B = '';
+		var SendToDiagRmsDateTime_C = '';
+		var stage3CurrenStageA = 14;
+		var stage3CurrenStageB = 14;
+		var stage3CurrenStageC = 14;
+		
+		
+		function stage3(patient) {
+
+			var visits = [];
+		
+			
+			if (patient == 'A') {
+				SendToDiagRmsDateTime_A = getCurrentDate()+' '+getCurrentTime();
+				stage3CurrenStageA = 20;
+				console.log(stage3CurrenStageA+' '+stage3CurrenStageB+' '+stage3CurrenStageC);
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "1",
+					"HN" : "129896",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_A,
+					"CurrenStage" : stage3CurrenStageA,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				},{
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "2",
+					"HN" : "129897",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_B,
+					"CurrenStage" : stage3CurrenStageB,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				}, {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "3",
+					"HN" : "129898",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_C,
+					"CurrenStage" : stage3CurrenStageC,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+
+			} else if (patient == 'B') {
+				SendToDiagRmsDateTime_B = getCurrentDate()+' '+getCurrentTime();
+				stage3CurrenStageB = 20;
+				console.log(stage3CurrenStageA+' '+stage3CurrenStageB+' '+stage3CurrenStageC);
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "2",
+					"HN" : "129897",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_B,
+					"CurrenStage" : stage3CurrenStageB,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				},{
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "1",
+					"HN" : "129896",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_A,
+					"CurrenStage" : stage3CurrenStageA,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				},{
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "3",
+					"HN" : "129898",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_C,
+					"CurrenStage" : stage3CurrenStageC,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				}
+				];
+			} else if (patient == 'C') {
+				SendToDiagRmsDateTime_C = getCurrentDate()+' '+getCurrentTime();
+				stage3CurrenStageC = 20;
+				console.log(stage3CurrenStageA+' '+stage3CurrenStageB+' '+stage3CurrenStageC);
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "3",
+					"HN" : "129898",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_C,
+					"CurrenStage" : stage3CurrenStageC,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				},{
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "2",
+					"HN" : "129897",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_B,
+					"CurrenStage" : stage3CurrenStageB,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				},{
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "1",
+					"HN" : "129896",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_A,
+					"CurrenStage" : stage3CurrenStageA,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			}
+
+			visits = JSON.stringify({
+
+				'visits' : visits
+
+			});
+
+			console.log('Patient : ' + patient
+					+ ' change his stage to WAITING_VISIT_DOCTOR_STAGE : '
+					+ visits);
+
+			$("#loader").show();
+			$.ajax({
+				url : "../smartqueue.do",
+				type : "POST",
+				dataType : "JSON",
+				data : visits,
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					console.log('Change stage success');
+					setTimeout(function() {
+						initPatientAInfomation();
+						initPatientBInfomation();
+						initPatientCInfomation();
+						window.location.href = '#patientInfo';
+					}, 4000);
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+		
+		function stage4(patient) {
+
+			var visits = [];
+			
+			if (patient == 'A') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "1",
+					"HN" : "129896",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_A,
+					"CurrenStage" : 15,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+
+			} else if (patient == 'B') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "2",
+					"HN" : "129897",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_B,
+					"CurrenStage" : 15,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			} else if (patient == 'C') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "3",
+					"HN" : "129898",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_C,
+					"CurrenStage" : 15,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			}
+
+			visits = JSON.stringify({
+
+				'visits' : visits
+
+			});
+
+			console.log('Patient : ' + patient
+					+ ' change his stage to VISITING_DCOTOR_STAGE : '
+					+ visits);
+
+			$("#loader").show();
+			$.ajax({
+				url : "../smartqueue.do",
+				type : "POST",
+				dataType : "JSON",
+				data : visits,
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					console.log('Change stage success');
+					setTimeout(function() {
+						initPatientAInfomation();
+						initPatientBInfomation();
+						initPatientCInfomation();
+						window.location.href = '#patientInfo';
+					}, 4000);
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+		
+		function stage5(patient) {
+
+			var visits = [];
+			
+			if (patient == 'A') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "1",
+					"HN" : "129896",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_A,
+					"CurrenStage" : 92,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+
+			} else if (patient == 'B') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "2",
+					"HN" : "129897",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_B,
+					"CurrenStage" : 92,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			} else if (patient == 'C') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "3",
+					"HN" : "129898",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_C,
+					"CurrenStage" : 92,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 0,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 0,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			}
+
+			visits = JSON.stringify({
+
+				'visits' : visits
+
+			});
+
+			console.log('Patient : ' + patient
+					+ ' change his stage to WAITING_PAYMENT_STAGE : '
+					+ visits);
+
+			$("#loader").show();
+			$.ajax({
+				url : "../smartqueue.do",
+				type : "POST",
+				dataType : "JSON",
+				data : visits,
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					console.log('Change stage success');
+					setTimeout(function() {
+						initPatientAInfomation();
+						initPatientBInfomation();
+						initPatientCInfomation();
+						window.location.href = '#patientInfo';
+					}, 4000);
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+		
+		function stage6(patient) {
+
+			var visits = [];
+			
+			if (patient == 'A') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "1",
+					"HN" : "129896",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_A,
+					"CurrenStage" : 92,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 1,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 1,
+					"NoneedDrugContractPayment" : 0
+				} ];
+
+			} else if (patient == 'B') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "2",
+					"HN" : "129897",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_B,
+					"CurrenStage" : 92,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 1,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 1,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			} else if (patient == 'C') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "3",
+					"HN" : "129898",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_C,
+					"CurrenStage" : 92,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 1,
+					"DrugReady" : 0,
+					"DrugDispense" : 0,
+					"AlreadySettleBalance" : 1,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			}
+
+			visits = JSON.stringify({
+
+				'visits' : visits
+
+			});
+
+			console.log('Patient : ' + patient
+					+ ' change his stage to WAITING_RECEIVE_DRUG_STAGE : '
+					+ visits);
+
+			$("#loader").show();
+			$.ajax({
+				url : "../smartqueue.do",
+				type : "POST",
+				dataType : "JSON",
+				data : visits,
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					console.log('Change stage success');
+					setTimeout(function() {
+						initPatientAInfomation();
+						initPatientBInfomation();
+						initPatientCInfomation();
+						window.location.href = '#patientInfo';
+					}, 4000);
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+		
+		function stage7(patient) {
+
+			var visits = [];
+			
+			if (patient == 'A') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "1",
+					"HN" : "129896",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_A,
+					"CurrenStage" : 92,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 1,
+					"DrugReady" : 1,
+					"DrugDispense" : 1,
+					"AlreadySettleBalance" : 1,
+					"NoneedDrugContractPayment" : 0
+				} ];
+
+			} else if (patient == 'B') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "2",
+					"HN" : "129897",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_B,
+					"CurrenStage" : 92,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 1,
+					"DrugReady" : 1,
+					"DrugDispense" : 1,
+					"AlreadySettleBalance" : 1,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			} else if (patient == 'C') {
+				
+				visits = [ {
+					"VisitDate" : getCurrentDate()+" 0:00",
+					"VN" : "3",
+					"HN" : "129898",
+					"ClinicName" : "Orthodontics",
+					"ClinicCode" : "001",
+					"DoctorRoom" : "S311",
+					"SendToDiagRmsDateTime" : SendToDiagRmsDateTime_C,
+					"CurrenStage" : 92,
+					"NurseReleaseDateTime" : null,
+					"DrugAcknowledge" : 1,
+					"DrugReady" : 1,
+					"DrugDispense" : 1,
+					"AlreadySettleBalance" : 1,
+					"NoneedDrugContractPayment" : 0
+				} ];
+			}
+
+			visits = JSON.stringify({
+
+				'visits' : visits
+
+			});
+
+			console.log('Patient : ' + patient
+					+ ' change his stage to GO_HOME_STAGE : '
+					+ visits);
+
+			$("#loader").show();
+			$.ajax({
+				url : "../smartqueue.do",
+				type : "POST",
+				dataType : "JSON",
+				data : visits,
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					console.log('Change stage success');
+					setTimeout(function() {
+						initPatientAInfomation();
+						initPatientBInfomation();
+						initPatientCInfomation();
+						window.location.href = '#patientInfo';
+					}, 4000);
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					alert('error');
+					$("#loader").hide();
+				}
+			});
+		}
+
+
+
+		function initPatientAInfomation() {
+			var HN = "129896";
+
+			$("#loader").show();
+			$.ajax({
+				url : "../findQueueDataByHN.do?HN=" + HN,
+				type : "GET",
+				dataType : "JSON",
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					console.log(data);
+					if (data != null || data != '') {
+
+						$("#currenStage_A").text(data.currentStage);
+						$("#remainingQueue_A").text(data.remainingQueue);
+						$("#estimatedTime_A").text(data.estimatedTime);
+						$("#sendToDiagRmsDateTime_A").text(data.sendToDiagRmsDateTime);
+					} else {
+
+						$("#currenStage_A").text('N/A');
+						$("#remainingQueue_A").text('N/A');
+						$("#estimatedTime_A").text('N/A');
+					}
+
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					console.log('Not found initPatientAInfomation');
+					$("#loader").hide();
+				}
+			});
+		}
+
+		function initPatientBInfomation() {
+			var HN = "129897";
+
+			$("#loader").show();
+			$.ajax({
+				url : "../findQueueDataByHN.do?HN=" + HN,
+				type : "GET",
+				dataType : "JSON",
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					console.log(data);
+					if (data != null || data != '') {
+
+						$("#currenStage_B").text(data.currentStage);
+						$("#remainingQueue_B").text(data.remainingQueue);
+						$("#estimatedTime_B").text(data.estimatedTime);
+						$("#sendToDiagRmsDateTime_B").text(data.sendToDiagRmsDateTime);
+					} else {
+
+						$("#currenStage_B").text('N/A');
+						$("#remainingQueue_B").text('N/A');
+						$("#estimatedTime_B").text('N/A');
+					}
+
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					console.log('Not found initPatientBInfomation');
+					$("#loader").hide();
+				}
+			});
+		}
+
+		function initPatientCInfomation() {
+			var HN = "129898";
+
+			$("#loader").show();
+			$.ajax({
+				url : "../findQueueDataByHN.do?HN=" + HN,
+				type : "GET",
+				dataType : "JSON",
+				contentType : "application/json",
+				mimeType : "application/json",
+				success : function(data) {
+					console.log(data);
+					if (data != null || data != '') {
+
+						$("#currenStage_C").text(data.currentStage);
+						$("#remainingQueue_C").text(data.remainingQueue);
+						$("#estimatedTime_C").text(data.estimatedTime);
+						$("#sendToDiagRmsDateTime_C").text(data.sendToDiagRmsDateTime);
+					} else {
+
+						$("#currenStage_C").text('N/A');
+						$("#remainingQueue_C").text('N/A');
+						$("#estimatedTime_C").text('N/A');
+					}
+
+					$("#loader").hide();
+				},
+				error : function(data, status, er) {
+					console.log('Not found initPatientCInfomation');
+					$("#loader").hide();
+				}
+			});
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+package com.mfu.entity.record;
+
+import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.util.Date;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import com.google.appengine.api.datastore.Key;
+import com.mfu.util.*;
+
+@Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class VitalSign implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Key key;
+	
+	private String patientId;
+	
+	@Transient
+	private String codeHN;
+	
+	private double bodyWeight;
+	private double bodyHeight;
+	private double temperature;
+	private double pulseRate;
+	private double respitoryRate;
+	private double bpSystolic;
+	private double bpDiastolic;
+	
+	@JsonDeserialize(using = DateTimeDeserializer.class)
+	@JsonSerialize(using = DateTimeSerializer.class)
+	private Date updateDate;
+	
+	public Key getKey() {
+		return key;
+	}
+	public void setKey(Key key) {
+		this.key = key;
+	}
+	public String getPatientId() {
+		return patientId;
+	}
+	public void setPatientId(String patientId) {
+		this.patientId = patientId;
+	}
+
+	public double getBodyWeight() {
+		return bodyWeight;
+	}
+	public void setBodyWeight(double bodyWeight) {
+		this.bodyWeight = bodyWeight;
+	}
+	public double getBodyHeight() {
+		return bodyHeight;
+	}
+	public void setBodyHeight(double bodyHeight) {
+		this.bodyHeight = bodyHeight;
+	}
+	public double getTemperature() {
+		return temperature;
+	}
+	public void setTemperature(double temperature) {
+		this.temperature = temperature;
+	}
+	public double getPulseRate() {
+		return pulseRate;
+	}
+	public void setPulseRate(double pulseRate) {
+		this.pulseRate = pulseRate;
+	}
+	public double getRespitoryRate() {
+		return respitoryRate;
+	}
+	public void setRespitoryRate(double respitoryRate) {
+		this.respitoryRate = respitoryRate;
+	}
+	public double getBpSystolic() {
+		return bpSystolic;
+	}
+	public void setBpSystolic(double bpSystolic) {
+		this.bpSystolic = bpSystolic;
+	}
+	public double getBpDiastolic() {
+		return bpDiastolic;
+	}
+	public void setBpDiastolic(double bpDiastolic) {
+		this.bpDiastolic = bpDiastolic;
+	}
+	public String getCodeHN() {
+		return codeHN;
+	}
+	public void setCodeHN(String codeHN) {
+		this.codeHN = codeHN;
+	}
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
+	
+	public String getBpAnalysis(){
+		if(this.bpDiastolic <= 60 && this.bpSystolic <= 90 ){
+			return "Low";
+		} else if (this.bpDiastolic <= 80 && this.bpSystolic <= 120){
+			return "Normal";
+		} else if (this.bpDiastolic <= 90 && this.bpSystolic <= 140){
+			return "Pre-high";
+		} else if (this.bpDiastolic <= 100 && this.bpSystolic <= 190){
+			return "High";
+		} else 
+			return "N/A";
+	}
+	
+	public String getBodyAnalysis(){
+		double bmi = this.getBMI();
+		if(bmi >= 30)
+			return "Obese";
+		else if(bmi >= 25 && bmi <30)
+			return "Overweight";
+		else if(bmi >=18.5 && bmi<25)
+			return "Normal";
+		else if(bmi < 18.5)
+			return "Underweight";
+		else
+			return "N/A";
+				
+	}
+	
+	public double getBMI(){
+		double hm = this.bodyHeight / 100;
+		return this.bodyWeight / hm; 
+	}
+	
+	
+	
+	
+}
